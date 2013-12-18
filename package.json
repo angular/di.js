@@ -1,0 +1,22 @@
+{
+  "name": "angularjs",
+  "version": "2.0.0",
+  "description": "A framework.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-traceur": "git://github.com/vojtajina/grunt-traceur.git#using-js-api",
+    "grunt-contrib-watch": "~0.5.3",
+    "karma": "~0.11.9",
+    "karma-jasmine": "~0.1.4",
+    "karma-requirejs": "~0.2.0",
+    "karma-chrome-launcher": "~0.1.1",
+    "karma-traceur": "git://github.com/vojtajina/karma-traceur.git#using-traceur-from-gh"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
