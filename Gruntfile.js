@@ -5,6 +5,10 @@ module.exports = function(grunt) {
         src: ['src/**/*.js', 'test/**/*.js'],
         dest: 'compiled/'
       },
+      example: {
+        src: ['example/**/*.js'],
+        dest: 'compiled/'
+      },
       options: {
         modules: 'requirejs',
         annotations: true
@@ -12,19 +16,23 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      transpile: {
+      main: {
         files: ['src/**/*.js', 'test/**/*.js'],
-        tasks: ['traceur'],
-        options: {
-          spawn: false,
-        },
+        tasks: ['traceur:main']
+      },
+      example: {
+        files: ['example/**/*.js'],
+        tasks: ['traceur:example']
+      },
+      options: {
+        spawn: false
       }
     }
   });
 
   // compile only changed file
-  grunt.event.on('watch', function(_, filepath) {
-    grunt.config('traceur.main.src', filepath);
+  grunt.event.on('watch', function(_, filepath, target) {
+    grunt.config('traceur.' + target + '.src', filepath);
   });
 
   // load plugins

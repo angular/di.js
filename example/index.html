@@ -1,0 +1,15 @@
+<html>
+  <head></head>
+  <body>
+    <script src="../node_modules/grunt-traceur/node_modules/traceur/src/runtime/runtime.js"></script>
+    <script src="../node_modules/requirejs/require.js"></script>
+    <script>
+
+      require.config({
+        baseUrl: '../compiled',
+        deps: ['example/main']
+      });
+
+    </script>
+  </body>
+</html>

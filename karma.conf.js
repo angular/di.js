@@ -17,12 +17,14 @@ module.exports = function(config) {
       'test-main.js',
 
       {pattern: 'src/**/*.js', included: false},
-      {pattern: 'test/**/*.js', included: false}
+      {pattern: 'test/**/*.js', included: false},
+      {pattern: 'example/**/*.js', included: false}
     ],
 
     preprocessors: {
       'src/**/*.js': ['traceur'],
-      'test/**/*.js': ['traceur']
+      'test/**/*.js': ['traceur'],
+      'example/**/*.js': ['traceur']
     },
 
     traceurPreprocessor: {
