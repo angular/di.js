@@ -12,7 +12,7 @@
     "karma-jasmine": "~0.1.4",
     "karma-requirejs": "~0.2.0",
     "karma-chrome-launcher": "~0.1.1",
-    "karma-traceur": "git://github.com/vojtajina/karma-traceur.git#using-traceur-from-gh"
+    "karma-traceur-preprocessor": "~0.1.4"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

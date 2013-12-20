@@ -6,7 +6,8 @@ module.exports = function(grunt) {
         dest: 'compiled/'
       },
       options: {
-        modules: 'requirejs'
+        modules: 'requirejs',
+        annotations: true
       }
     },
 
