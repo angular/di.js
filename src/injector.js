@@ -9,6 +9,7 @@ function isClass(clsOrFunction) {
 class Injector {
   constructor(modules) {
     this.providers = Object.create(null);
+    this.cache = Object.create(null);
 
     modules.forEach((m) => {
       Object.keys(m).forEach((key) => {
@@ -27,6 +28,10 @@ class Injector {
   }
 
   get(token) {
+    if (Object.hasOwnProperty.call(this.cache, token)) {
+      return this.cache[token];
+    }
+
     var provider = this.providers[token];
     var args = provider.params.map((token) => {
       return this.get(token);
@@ -37,7 +42,9 @@ class Injector {
       context = Object.create(provider.provider.prototype);
     }
 
-    return provider.provider.apply(context, args) || context;
+    this.cache[token] = provider.provider.apply(context, args) || context;
+
+    return this.cache[token];
   }
 
   invoke(fn, context) {

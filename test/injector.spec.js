@@ -11,4 +11,10 @@ describe('injector', function() {
     expect(car instanceof carModule.Car).toBe(true);
     expect(car.engine).toBe('strong engine');
   });
+
+  it('should cache instances', function() {
+    var i = new Injector([carModule]);
+
+    expect(i.get('Car')).toBe(i.get('Car'));
+  });
 });
