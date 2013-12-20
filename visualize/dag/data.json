@@ -1,0 +1,14 @@
+[
+  {
+    "source": "CoffeeMaker",
+    "target": "Heater"
+  },
+  {
+    "source": "CoffeeMaker",
+    "target": "Pump"
+  },
+  {
+    "source": "Pump",
+    "target": "Heater"
+  }
+]
