@@ -10,7 +10,7 @@ class ProvideAnnotation {
   }
 }
 
-// Helpers for when annotations are not enabled.
+// Helpers for when annotations are not enabled in Traceur.
 function annotate(fn, annotation) {
   fn.annotations = fn.annotations || [];
   fn.annotations.push(annotation);

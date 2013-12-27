@@ -7,34 +7,63 @@ function isClass(clsOrFunction) {
 }
 
 class Injector {
-  constructor(modules) {
+  constructor(modules, parentInjector = null) {
+    // TODO(vojta): use Map once available
     this.providers = Object.create(null);
     this.cache = Object.create(null);
+    this.parent = parentInjector;
 
-    modules.forEach((m) => {
-      Object.keys(m).forEach((key) => {
-        var provider = m[key];
+    for (var module of modules) {
+      Object.keys(module).forEach((key) => {
+        var provider = module[key];
         var providedAs = getProvideAnnotation(provider, key);
-
+        var params = getInjectAnnotation(provider) || [];
+        // console.log('registering provider for', providedAs || key, params);
         // if (providedAs) {
           this.providers[providedAs || key] = {
             provider: provider,
-            params: getInjectAnnotation(provider) || [],
+            params: params,
             isClass: isClass(provider)
           };
         // }
       });
-    });
+    }
   }
 
-  get(token) {
+  get(token, resolving = []) {
+    // console.log('get', token)
     if (Object.hasOwnProperty.call(this.cache, token)) {
       return this.cache[token];
     }
 
     var provider = this.providers[token];
+    var resolvingMsg = '';
+
+    if (!provider) {
+      if (!this.parent) {
+        if (resolving.length) {
+          resolving.push(token);
+          resolvingMsg = ` (${resolving.join(' -> ')})`;
+        }
+
+        throw new Error(`No provider for ${token}!${resolvingMsg}`);
+      }
+
+      return this.parent.get(token, resolving);
+    }
+
+    if (resolving.indexOf(token) !== -1) {
+      if (resolving.length) {
+        resolving.push(token);
+        resolvingMsg = ` (${resolving.join(' -> ')})`;
+      }
+      throw new Error(`Cannot instantiate cyclic dependency!${resolvingMsg}`);
+    }
+
+    resolving.push(token);
+
     var args = provider.params.map((token) => {
-      return this.get(token);
+      return this.get(token, resolving);
     });
     var context = undefined;
 
@@ -44,12 +73,19 @@ class Injector {
 
     this.cache[token] = provider.provider.apply(context, args) || context;
 
+    resolving.pop();
+
     return this.cache[token];
   }
 
   invoke(fn, context) {
 
   }
+
+  createChild(modules = []) {
+    return new Injector(modules, this);
+  }
+
 
   dump() {
     var links = [];

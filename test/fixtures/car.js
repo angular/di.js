@@ -12,10 +12,21 @@ export function createEngine() {
   return 'strong engine';
 }
 
-// @Inject('engine')
-annotate(Car, new InjectAnnotation('engine'));
+export class CyclicEngine {
+  constructor(car) {}
+
+  start() {}
+}
+
+
+
+// @Inject('Engine')
+annotate(Car, new InjectAnnotation('Engine'));
 // @Provide()
 annotate(Car, new ProvideAnnotation('Car'));
 
-// @Provide('engine')
-annotate(createEngine, new ProvideAnnotation('engine'));
+// @Provide('Engine')
+annotate(createEngine, new ProvideAnnotation('Engine'));
+
+// @Inject('Car')
+annotate(CyclicEngine, new InjectAnnotation('Car'));
