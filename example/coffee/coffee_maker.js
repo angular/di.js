@@ -1,7 +1,7 @@
-import {InjectAnnotation as Inject} from '../../src/annotations';
+import {InjectAnnotation as Inject, annotate} from '../../src/annotations';
 
 
-@Inject('Heater', 'Pump')
+// @Inject('Heater', 'Pump')
 class CoffeeMaker {
   constructor(heater, pump) {
     this.heater = heater;
@@ -14,5 +14,7 @@ class CoffeeMaker {
     console.log('Brewing...')
   }
 }
+
+annotate(CoffeeMaker, new Inject('Heater', 'Pump'));
 
 export {CoffeeMaker};
