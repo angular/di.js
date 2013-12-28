@@ -12,7 +12,7 @@
     "karma-jasmine": "~0.1.4",
     "karma-requirejs": "~0.2.0",
     "karma-chrome-launcher": "~0.1.1",
-    "karma-traceur-preprocessor": "~0.1.4",
+    "karma-traceur-preprocessor": "git://github.com/karma-runner/karma-traceur-preprocessor.git#error-callback",
     "requirejs": "~2.1.9"
   },
   "scripts": {
