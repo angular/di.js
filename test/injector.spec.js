@@ -5,36 +5,59 @@ module houseModule from './fixtures/house';
 module shinyHouseModule from './fixtures/shiny_house';
 
 
+// TODO(vojta): move matchers somewhere ;-)
+beforeEach(function() {
+  this.addMatchers({
+    toBeInstanceOf: function(expectedClass) {
+      // TODO(vojta): support not.toBeInstanceOf
+      if (this.isNot) {
+        throw new Error('not.toBeInstanceOf is not supported!');
+      }
+
+      var actual = this.actual;
+
+      this.message = function() {
+        return 'Expected ' + jasmine.pp(actual) + ' to be an instance of ' + jasmine.pp(expectedClass);
+      };
+
+      return typeof this.actual === 'object' && this.actual instanceof expectedClass;
+    }
+  });
+});
+
+
 describe('injector', function() {
 
   it('should resolve dependencies', function() {
     var i = new Injector([carModule]);
     var car = i.get('Car');
 
-    expect(car).toBeDefined();
-    expect(car instanceof carModule.Car).toBe(true);
+    expect(car).toBeInstanceOf(carModule.Car);
     expect(car.engine).toBe('strong engine');
   });
 
 
   it('should cache instances', function() {
     var i = new Injector([carModule]);
+    var car = i.get('Car');
 
-    expect(i.get('Car')).toBe(i.get('Car'));
+    expect(i.get('Car')).toBe(car);
   });
 
 
   it('should throw when no provider', function() {
     var i = new Injector([]);
 
-    expect(function() {i.get('NonExisting')}).toThrow('No provider for NonExisting!');
+    expect(() => i.get('NonExisting'))
+        .toThrow('No provider for NonExisting!');
   });
 
 
   it('should show the full path when no provider', function() {
     var i = new Injector([houseModule]);
 
-    expect(function() {i.get('House')}).toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
+    expect(() => i.get('House'))
+        .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
   });
 
 
@@ -45,7 +68,8 @@ describe('injector', function() {
 
     var i = new Injector([carModule, useCyclicEngineModule]);
 
-    expect(function() {i.get('Car')}).toThrow('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
+    expect(() => i.get('Car'))
+        .toThrow('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
   });
 
 
@@ -55,7 +79,10 @@ describe('injector', function() {
       var parent = new Injector([carModule]);
       var child = parent.createChild([]);
 
-      expect(parent.get('Car')).toBe(child.get('Car'));
+      var carFromParent = parent.get('Car');
+      var carFromChild = child.get('Car');
+
+      expect(carFromChild).toBe(carFromParent);
     });
 
 
@@ -75,7 +102,7 @@ describe('injector', function() {
       var carFromChild = child.get('Car');
 
       expect(carFromParent).not.toBe(carFromChild);
-      expect(carFromChild instanceof MockCar).toBe(true);
+      expect(carFromChild).toBeInstanceOf(MockCar);
     });
 
 
@@ -83,7 +110,8 @@ describe('injector', function() {
       var i = new Injector([houseModule]);
       var child = i.createChild([shinyHouseModule]);
 
-      expect(function() {child.get('House')}).toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
+      expect(() => child.get('House'))
+          .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
     });
   });
 });
