@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<title>Visualization of injectors</title>
+
+<body ng-app="di-visualiser" ng-controller="Main" ng-cloak>
+
+  <div class="control-panel">
+    <ul class="providers" ng-show="providers.length">
+      <li ng-repeat="provider in providers" ng-class="{highlighted: provider.highlighted}" on-toggle="highlight(provider, toggled)">
+      {{provider.name}}
+      </li>
+    </ul>
+    <label><input type="checkbox" ng-model="showAllDependencies"> show all deps</label>
+  </div>
+
+
+  <graph width="800" height="800"></graph>
+
+<!-- CDN
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
+-->
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../lib/angular.js"></script>
+
+<script src="app.js"></script>
+
+</body>

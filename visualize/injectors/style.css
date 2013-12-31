@@ -1,0 +1,110 @@
+[ng-cloak] {
+  display: none;
+}
+
+body {
+  font-family: monospace;
+}
+
+label {
+  cursor: pointer;
+}
+
+
+/* circles */
+
+.node {
+  cursor: pointer;
+}
+
+.injector circle {
+  fill: #0a629f;
+  fill-opacity: .2;
+  stroke: #0a629f;
+}
+
+.provider circle {
+  fill: #fff;
+  fill-opacity: .8;
+  stroke-width: 1px;
+  stroke: #000;
+}
+
+.injector.highlighted circle {
+  stroke-width: 4px;
+}
+
+.provider.highlighted circle {
+  stroke-width: 2px;
+  stroke: #000;
+  fill: #ff6;
+}
+
+
+/* links */
+
+.link {
+  fill: none;
+  stroke-linecap: round;
+
+}
+
+.link.dependency {
+  display: none;
+  stroke-width: 2px;
+}
+
+.link.dependency.highlighted {
+  display: inline;
+}
+
+.link.dependency.in {
+  stroke: green;
+}
+
+.link.dependency.out {
+  stroke: red;
+}
+
+.link.override {
+  stroke: #000;
+  stroke-width: 1px;
+  stroke-dasharray: 10px;
+}
+
+.link.override.highlighted {
+}
+
+marker#dependency-in {
+  fill: green;
+}
+
+marker#dependency-out {
+  fill: red;
+}
+
+/* list of providers */
+.control-panel {
+  float: right;
+}
+
+.control-panel button {
+  width: 144px;
+}
+
+.providers {
+  width: 140px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 2px solid #0a629f;
+}
+
+.providers li {
+  cursor: pointer;
+  padding: 1px 6px 1px 6px;
+}
+
+.providers li.highlighted {
+  background: #ff6;
+}

@@ -1,0 +1,71 @@
+{
+  "injectors": [{
+    "id": 1,
+    "parent_id": null,
+    "providers": {
+      "Kitchen": {
+        "name": "Kitchen",
+        "dependencies": [
+          "CoffeeMaker",
+          "Skillet",
+          "Stove",
+          "Fridge",
+          "Dishwasher"
+        ]
+      },
+      "CoffeeMaker": {
+        "name": "CoffeeMaker",
+        "dependencies": [
+          "Grinder",
+          "Pump",
+          "Heater"
+        ]
+      },
+      "Grinder": {
+        "name": "Grinder",
+        "dependencies": [
+          "Electricity"
+        ]
+      },
+      "Electricity": {
+        "name": "Electricity",
+        "dependencies": []
+      },
+      "Pump": {
+        "name": "Pump",
+        "dependencies": [
+          "Heater",
+          "Electricity"
+        ]
+      },
+      "Heater": {
+        "name": "Heater",
+        "dependencies": [
+          "Electricity"
+        ]
+      },
+      "Skillet": {
+        "name": "Skillet",
+        "dependencies": []
+      },
+      "Stove": {
+        "name": "Stove",
+        "dependencies": [
+          "Electricity"
+        ]
+      },
+      "Fridge": {
+        "name": "Fridge",
+        "dependencies": [
+          "Electricity"
+        ]
+      },
+      "Dishwasher": {
+        "name": "Dishwasher",
+        "dependencies": [
+          "Electricity"
+        ]
+      }
+    }
+  }]
+}

@@ -1,0 +1,30 @@
+{
+  "injectors": [
+  {
+    "id": "1",
+    "parent_id": null,
+    "providers": {
+      "CoffeMaker": {"name": "CoffeMaker", "dependencies": ["Heater", "Pump"]},
+      "Heater":     {"name": "Heater", "dependencies": []},
+      "Pump":       {"name": "Pump",   "dependencies": ["Heater"]},
+      "Extra":      {"name": "Extra",  "dependencies": ["Pump"]}
+    }
+  },
+  {
+    "id": "2",
+    "parent_id": "1",
+    "providers": {
+      "Heater": {"name": "Heater", "dependencies": []},
+      "Extra":  {"name": "Extra", "dependencies": []}
+    }
+  },
+  {
+    "id": "3",
+    "parent_id": "1",
+    "providers": {
+      "Heater": {"name": "Heater", "dependencies": ["Pump", "Extra"]},
+      "Pump":   {"name": "Pump",   "dependencies": []}
+    }
+  }
+  ]
+}

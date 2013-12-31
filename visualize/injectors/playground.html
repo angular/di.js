@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Playground</title>
+<style>
+  path {
+    fill: gray;
+    stroke: red;
+    stroke-width: 2px;
+  }
+</style>
+
+<body>
+
+<!-- CDN
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
+-->
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../lib/angular.js"></script>
+
+<script>
+
+  var svg = d3.select('body').insert('svg:svg').attr('width', 800).attr('height', 800)
+    .append('svg:g')
+
+var circles = [{x: 20, y: 200, r: 20}, {x: 200, y: 130, r: 20}];
+
+svg.selectAll('circle').data(circles)
+  .enter().append('svg:circle')
+  .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+  .attr('r', function(d) {
+    return d.r;
+  })
+
+var linkArc = function(d) {
+  console.log(d)
+    var dx = d.target.x - d.source.x,
+        dy = d.target.y - d.source.y,
+        dr = Math.sqrt(dx * dx + dy * dy);
+console.log(dx, dy)
+    var sx = d.source.x + (d.source.r * dx / dr),
+        sy = d.source.y + (d.source.r * dy / dr),
+        tx = d.target.x - (d.target.r * dx / dr),
+        ty = d.target.y - (d.target.r * dy / dr);
+
+    // return 'M' + sx + ',' + sy + 'L' + tx + ',' + ty;
+    return 'M' + d.source.x + ',' + d.source.y + 'A120,120,45,0,0,' + d.target.x + ',' + d.target.y;
+  };
+
+svg.selectAll('path').data([{source: circles[0], target: circles[1]}])
+  .enter().append('svg:path')
+    .attr('d', linkArc)
+
+
+
+</script>
+
+</body>

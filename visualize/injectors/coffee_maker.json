@@ -1,0 +1,39 @@
+{
+  "injectors": [{
+    "id": 1,
+    "parent_id": null,
+    "providers": {
+      "CoffeeMaker": {
+        "name": "CoffeeMaker",
+        "dependencies": [
+          "Grinder",
+          "Pump",
+          "Heater"
+        ]
+      },
+      "Grinder": {
+        "name": "Grinder",
+        "dependencies": [
+          "Electricity"
+        ]
+      },
+      "Electricity": {
+        "name": "Electricity",
+        "dependencies": []
+      },
+      "Pump": {
+        "name": "Pump",
+        "dependencies": [
+          "Heater",
+          "Electricity"
+        ]
+      },
+      "Heater": {
+        "name": "Heater",
+        "dependencies": [
+          "Electricity"
+        ]
+      }
+    }
+  }]
+}
