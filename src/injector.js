@@ -1,5 +1,10 @@
 import {getProvideAnnotation, getInjectAnnotation} from './annotations';
 
+// TODO(vojta): move to profiler/debug module
+var globalCounter = 0;
+function getUniqueId() {
+  return ++globalCounter;
+}
 
 // TODO(vojta): this is super lame, figure out something better.
 function isClass(clsOrFunction) {
@@ -12,6 +17,7 @@ class Injector {
     this.providers = Object.create(null);
     this.cache = Object.create(null);
     this.parent = parentInjector;
+    this.id = getUniqueId();
 
     for (var module of modules) {
       Object.keys(module).forEach((key) => {
@@ -88,19 +94,20 @@ class Injector {
 
 
   dump() {
-    var links = [];
+    var dump = {
+      id: this.id,
+      parent_id: this.parent ? this.parent.id : null,
+      providers: {}
+    };
 
     Object.keys(this.providers).forEach((token) => {
-      var provider = this.providers[token];
-      provider.params.forEach((dependency) =>{
-        links.push({
-          source: token,
-          target: dependency
-        });
-      });
+      dump.providers[token] = {
+        name: token,
+        dependencies: this.providers[token].params
+      };
     });
 
-    console.log(JSON.stringify(links, null, 2))
+    return dump;
   }
 }
 
