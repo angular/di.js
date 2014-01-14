@@ -1,7 +1,7 @@
 {
-  "name": "angularjs",
+  "name": "angular-di",
   "version": "2.0.0",
-  "description": "A framework.",
+  "description": "A DI framework.",
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
