@@ -11,6 +11,12 @@ function isClass(clsOrFunction) {
   return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
+// I know, this is lame...
+function hash(fn) {
+  return fn && fn.toString();
+}
+
+
 class Injector {
   constructor(modules, parentInjector = null) {
     // TODO(vojta): use Map once available
@@ -22,11 +28,11 @@ class Injector {
     for (var module of modules) {
       Object.keys(module).forEach((key) => {
         var provider = module[key];
-        var providedAs = getProvideAnnotation(provider, key);
+        var providedAs = hash(getProvideAnnotation(provider)) || key;
         var params = getInjectAnnotation(provider) || [];
         // console.log('registering provider for', providedAs || key, params);
         // if (providedAs) {
-          this.providers[providedAs || key] = {
+          this.providers[providedAs] = {
             provider: provider,
             params: params,
             isClass: isClass(provider)
@@ -37,13 +43,27 @@ class Injector {
   }
 
   get(token, resolving = []) {
-    // console.log('get', token)
+    var defaultProvider = null;
+
+    if (typeof token === 'function') {
+      defaultProvider = token;
+      token = hash(token);
+    }
+
     if (Object.hasOwnProperty.call(this.cache, token)) {
       return this.cache[token];
     }
 
     var provider = this.providers[token];
     var resolvingMsg = '';
+
+    if (!provider && defaultProvider) {
+      provider = {
+        provider: defaultProvider,
+        params: getInjectAnnotation(defaultProvider) || [],
+        isClass: isClass(defaultProvider)
+      };
+    }
 
     if (!provider) {
       if (!this.parent) {

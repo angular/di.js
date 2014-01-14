@@ -1,8 +1,11 @@
 import {Injector} from '../src/injector';
+import {Inject} from '../src/annotations';
 
 module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
 module shinyHouseModule from './fixtures/shiny_house';
+
+
 
 
 // TODO(vojta): move matchers somewhere ;-)
@@ -27,6 +30,29 @@ beforeEach(function() {
 
 
 describe('injector', function() {
+
+  it('should work with fn annotations', function() {
+    class Engine {
+      start() {}
+    }
+
+    @Inject(Engine)
+    class Car {
+      constructor(engine) {
+        this.engine = engine;
+      }
+
+      start() {}
+    }
+
+    var i = new Injector([]);
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+    expect(car.engine).toBeInstanceOf(Engine);
+
+  });
+
 
   it('should resolve dependencies', function() {
     var i = new Injector([carModule]);

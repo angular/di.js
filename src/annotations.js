@@ -21,7 +21,7 @@ function annotate(fn, annotation) {
 }
 
 
-function getProvideAnnotation(provider, defaultAnnotation) {
+function getProvideAnnotation(provider) {
   if (!provider || !provider.annotations || !provider.annotations.length) {
     return null;
   }
@@ -30,7 +30,7 @@ function getProvideAnnotation(provider, defaultAnnotation) {
   var annotations = provider.annotations;
   for (var i = 0; i < annotations.length; i++) {
     if (annotations[i] instanceof ProvideAnnotation) {
-      return annotations[i].id || defaultAnnotation;
+      return annotations[i].id;
     }
   }
 
