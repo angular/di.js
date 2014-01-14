@@ -10,6 +10,10 @@ class ProvideAnnotation {
   }
 }
 
+// aliases
+var Inject = InjectAnnotation;
+var Provide = ProvideAnnotation;
+
 // Helpers for when annotations are not enabled in Traceur.
 function annotate(fn, annotation) {
   fn.annotations = fn.annotations || [];
@@ -50,7 +54,9 @@ function getInjectAnnotation(provider) {
 
 export {
   annotate,
+  Inject,
   InjectAnnotation,
+  Provide,
   ProvideAnnotation,
   getInjectAnnotation,
   getProvideAnnotation
