@@ -147,7 +147,10 @@ var GraphController = function($scope, $element, $attrs) {
       tx = tx - d.target.links.top.length * MARKER_SIZE / 2 + MARKER_SIZE * idx;
     }
 
-    return 'M' + sx + ',' + sy + 'A' + dr + ',' + dr + ' 0 0,1 ' + tx + ',' + ty;
+    var curving = dx < 0 ? 0 : 1;
+
+
+    return 'M' + sx + ',' + sy + 'A' + dr + ',' + dr + ' 0 0,' + curving + ' ' + tx + ',' + ty;
   };
 
   var linkMarkerEnd = function (d) {
