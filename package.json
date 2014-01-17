@@ -8,6 +8,7 @@
     "grunt": "~0.4.2",
     "grunt-traceur": "git://github.com/vojtajina/grunt-traceur.git#using-js-api",
     "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-connect": "~0.6.0",
     "karma": "0.11.11-dev",
     "karma-jasmine": "~0.1.4",
     "karma-requirejs": "~0.2.0",

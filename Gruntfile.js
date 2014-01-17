@@ -27,6 +27,16 @@ module.exports = function(grunt) {
       options: {
         spawn: false
       }
+    },
+
+    connect: {
+      server: {
+        options: {
+          port: 8000,
+          keepalive: true,
+          open: true
+        }
+      }
     }
   });
 
@@ -35,7 +45,11 @@ module.exports = function(grunt) {
     grunt.config('traceur.' + target + '.src', filepath);
   });
 
+  // aliases
+  grunt.registerTask('serve', 'Run a connect webserver', ['connect:server']);
+
   // load plugins
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-traceur');
 };
