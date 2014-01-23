@@ -1,6 +1,6 @@
 class InjectAnnotation {
-  constructor() {
-    this.params = Array.prototype.slice.call(arguments);
+  constructor(...params) {
+    this.params = params;
   }
 }
 
@@ -28,9 +28,10 @@ function getProvideAnnotation(provider) {
 
 
   var annotations = provider.annotations;
-  for (var i = 0; i < annotations.length; i++) {
-    if (annotations[i] instanceof ProvideAnnotation) {
-      return annotations[i].id;
+
+  for (var annotation of annotations) {
+    if (annotation instanceof ProvideAnnotation) {
+      return annotation.id;
     }
   }
 
@@ -43,9 +44,9 @@ function getInjectAnnotation(provider) {
   }
 
   var annotations = provider.annotations;
-  for (var i = 0; i < annotations.length; i++) {
-    if (annotations[i] instanceof InjectAnnotation) {
-      return annotations[i].params;
+  for (var annotation of annotations) {
+    if (annotation instanceof InjectAnnotation) {
+      return annotation.params;
     }
   }
 

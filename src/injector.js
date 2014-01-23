@@ -30,11 +30,12 @@ class Injector {
         var provider = module[key];
         var providedAs = hash(getProvideAnnotation(provider)) || key;
         var params = getInjectAnnotation(provider) || [];
+
         // console.log('registering provider for', providedAs || key, params);
         // if (providedAs) {
           this.providers[providedAs] = {
-            provider: provider,
-            params: params,
+            provider,
+            params,
             isClass: isClass(provider)
           };
         // }
@@ -50,7 +51,7 @@ class Injector {
       token = hash(token);
     }
 
-    if (Object.hasOwnProperty.call(this.cache, token)) {
+    if (Object.prototype.hasOwnProperty.call(this.cache, token)) {
       return this.cache[token];
     }
 
