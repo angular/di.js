@@ -60,6 +60,13 @@ module.exports = function(config) {
 
 
     // Start these browsers:
-    browsers: ['Chrome'],
+    browsers: ['Chrome_harmony'],
+
+    customLaunchers: {
+      'Chrome_harmony': {
+        base: 'Chrome',
+        flags: ['--js-flags=--harmony']
+      }
+    }
   });
 };

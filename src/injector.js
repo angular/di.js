@@ -11,17 +11,11 @@ function isClass(clsOrFunction) {
   return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
-// I know, this is lame...
-function hash(fn) {
-  return fn && fn.toString();
-}
-
 
 class Injector {
   constructor(modules, parentInjector = null) {
-    // TODO(vojta): use Map once available
-    this.providers = Object.create(null);
-    this.cache = Object.create(null);
+    this.providers = new Map();
+    this.cache = new Map();
     this.parent = parentInjector;
     this.id = getUniqueId();
 
@@ -40,15 +34,15 @@ class Injector {
   }
 
   _loadProvider(provider, key) {
-      var providedAs = hash(getProvideAnnotation(provider)) || key;
+      var token = getProvideAnnotation(provider) || key;
       var params = getInjectAnnotation(provider) || [];
-      // console.log('registering provider for', providedAs || key, params);
-      if (providedAs) {
-        this.providers[providedAs] = {
+
+      if (token) {
+        this.providers.set(token, {
           provider: provider,
           params: params,
           isClass: isClass(provider)
-        };
+        });
       }
     }
 
@@ -57,14 +51,13 @@ class Injector {
 
     if (typeof token === 'function') {
       defaultProvider = token;
-      token = hash(token);
     }
 
-    if (Object.prototype.hasOwnProperty.call(this.cache, token)) {
-      return this.cache[token];
+    if (this.cache.has(token)) {
+      return this.cache.get(token);
     }
 
-    var provider = this.providers[token];
+    var provider = this.providers.get(token);
     var resolvingMsg = '';
 
     if (!provider && defaultProvider) {
@@ -107,11 +100,12 @@ class Injector {
       context = Object.create(provider.provider.prototype);
     }
 
-    this.cache[token] = provider.provider.apply(context, args) || context;
+    var instance = provider.provider.apply(context, args) || context;
 
+    this.cache.set(token, instance);
     resolving.pop();
 
-    return this.cache[token];
+    return instance;
   }
 
   invoke(fn, context) {
