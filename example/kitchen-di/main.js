@@ -4,8 +4,7 @@ import {MockHeater} from './mock_heater';
 
 
 function main() {
-  // TODO(vojta): support loading a provider directly
-  var injector = new Injector([{x: MockHeater}]);
+  var injector = new Injector([MockHeater]);
   var kitchen = injector.get(Kitchen);
 
   kitchen.makeBreakfast();

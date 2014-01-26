@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject} from '../src/annotations';
+import {Inject, Provide} from '../src/annotations';
 
 module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
@@ -50,7 +50,32 @@ describe('injector', function() {
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(Engine);
+  });
 
+  it('should load providers', function() {
+    class Engine {
+      start() {}
+    }
+
+    @Inject(Engine)
+    class Car {
+      constructor(engine) {
+        this.engine = engine;
+      }
+
+      start() {}
+    }
+
+    @Provide(Engine)
+    class MockEngine {
+      start() {}
+    }
+
+    var i = new Injector([MockEngine]);
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+    expect(car.engine).toBeInstanceOf(MockEngine);
   });
 
 

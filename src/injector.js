@@ -26,22 +26,31 @@ class Injector {
     this.id = getUniqueId();
 
     for (var module of modules) {
-      Object.keys(module).forEach((key) => {
-        var provider = module[key];
-        var providedAs = hash(getProvideAnnotation(provider)) || key;
-        var params = getInjectAnnotation(provider) || [];
+      // A single provider.
+      if (typeof module === 'function') {
+        this._loadProvider(module);
+        continue;
+      }
 
-        // console.log('registering provider for', providedAs || key, params);
-        // if (providedAs) {
-          this.providers[providedAs] = {
-            provider,
-            params,
-            isClass: isClass(provider)
-          };
-        // }
+      // A module (map of providers).
+      Object.keys(module).forEach((key) => {
+        this._loadProvider(module[key], key);
       });
     }
   }
+
+  _loadProvider(provider, key) {
+      var providedAs = hash(getProvideAnnotation(provider)) || key;
+      var params = getInjectAnnotation(provider) || [];
+      // console.log('registering provider for', providedAs || key, params);
+      if (providedAs) {
+        this.providers[providedAs] = {
+          provider: provider,
+          params: params,
+          isClass: isClass(provider)
+        };
+      }
+    }
 
   get(token, resolving = []) {
     var defaultProvider = null;
