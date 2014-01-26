@@ -5,7 +5,6 @@ import {Electricity} from './electricity';
 export class Dishwasher {
   constructor(electricity) {
     this.electricity = electricity;
-    this.name = 'dishwasher';
   }
 
   add(item) {

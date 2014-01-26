@@ -4,7 +4,6 @@ import {Electricity} from '../electricity';
 @Inject(Electricity)
 export class Heater {
   constructor(electricity) {
-    this.name = 'heater';
     this.electricity = electricity;
   }
 

@@ -1,8 +1,6 @@
 
 export class Skillet {
-  constructor() {
-    this.name = 'skillet';
-  }
+  constructor() {}
 
   add(item) {
     console.log('Adding ' + item + ' to the skillet.');
