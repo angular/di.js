@@ -5,6 +5,24 @@ module.exports = function(grunt) {
         src: ['src/**/*.js', 'test/**/*.js'],
         dest: 'compiled/'
       },
+      dist_cjs: {
+        src: ['src/**/*.js'],
+        dest: 'dist/cjs/',
+        options: {
+          modules: 'nodejs'
+        }
+      },
+      dist_amd: {
+        src: ['src/**/*.js'],
+        dest: 'dist/amd/',
+      },
+      example_cjs: {
+        src: ['example/**/*.js'],
+        dest: 'cjs/',
+        options: {
+          modules: 'nodejs'
+        }
+      },
       example: {
         src: ['example/**/*.js'],
         dest: 'compiled/'
