@@ -38,17 +38,17 @@ class Injector {
       return;
     }
 
-      var token = getProvideAnnotation(provider) || key;
-      var params = getInjectAnnotation(provider) || [];
+    var token = getProvideAnnotation(provider) || key;
+    var params = getInjectAnnotation(provider) || [];
 
-      if (token) {
-        this.providers.set(token, {
-          provider: provider,
-          params: params,
-          isClass: isClass(provider)
-        });
-      }
+    if (token) {
+      this.providers.set(token, {
+        provider: provider,
+        params: params,
+        isClass: isClass(provider)
+      });
     }
+  }
 
   get(token, resolving = []) {
     var defaultProvider = null;
