@@ -18,7 +18,7 @@ module.exports = function(config) {
 
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
-      {pattern: 'example/**/*.js', included: false}
+      {pattern: 'example/coffee/*.js', included: false}
     ],
 
     preprocessors: {
