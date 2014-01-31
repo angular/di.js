@@ -34,6 +34,10 @@ class Injector {
   }
 
   _loadProvider(provider, key) {
+    if (typeof provider !== 'function') {
+      return;
+    }
+
       var token = getProvideAnnotation(provider) || key;
       var params = getInjectAnnotation(provider) || [];
 
