@@ -1,4 +1,4 @@
-import {getProvideAnnotation, getInjectAnnotation} from './annotations';
+import {getProvideAnnotation, getInjectAnnotation, Inject} from './annotations';
 
 // TODO(vojta): move to profiler/debug module
 var globalCounter = 0;
@@ -39,15 +39,34 @@ class Injector {
     }
 
     var token = getProvideAnnotation(provider) || key;
+
+    this.providers.set(token, {
+      provider: provider,
+      params: this._getInjectTokens(provider),
+      isClass: isClass(provider)
+    });
+  }
+
+  // TODO(vojta): move this to annotations.
+  _getInjectTokens(provider) {
+    // Read the @Inject annotation on the class / function.
     var params = getInjectAnnotation(provider) || [];
 
-    if (token) {
-      this.providers.set(token, {
-        provider: provider,
-        params: params,
-        isClass: isClass(provider)
+    // Read the annotations on individual parameters.
+    if (provider.parameters) {
+      provider.parameters.forEach((param, idx) => {
+        for (var paramAnnotation of param) {
+          if (typeof paramAnnotation === 'function' && !params[idx]) {
+            params[idx] = paramAnnotation;
+          } else if (paramAnnotation instanceof Inject) {
+            params[idx] = paramAnnotation.params[0];
+            continue;
+          }
+        }
       });
     }
+
+    return params;
   }
 
   get(token, resolving = []) {
@@ -67,7 +86,7 @@ class Injector {
     if (!provider && defaultProvider) {
       provider = {
         provider: defaultProvider,
-        params: getInjectAnnotation(defaultProvider) || [],
+        params: this._getInjectTokens(defaultProvider),
         isClass: isClass(defaultProvider)
       };
     }

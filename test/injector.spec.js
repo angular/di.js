@@ -79,6 +79,77 @@ describe('injector', function() {
   });
 
 
+  it('should use type annotations when available', function() {
+    class Engine {
+      start() {}
+    }
+
+    class Car {
+      constructor(e: Engine) {
+        this.engine = e;
+      }
+      start() {}
+    }
+
+    var i = new Injector([]);
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+    expect(car.engine).toBeInstanceOf(Engine);
+  });
+
+
+  it('should use @Inject over type annotations', function() {
+    class Engine {
+      start() {}
+    }
+
+    class MockEngine {
+      start() {}
+    }
+
+    @Inject(MockEngine)
+    class Car {
+      constructor(e: Engine) {
+        this.engine = e;
+      }
+      start() {}
+    }
+
+    var i = new Injector([]);
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+    expect(car.engine).toBeInstanceOf(MockEngine);
+  });
+
+
+  it('should use mixed @Inject type annotations', function() {
+    class Engine {
+      start() {}
+    }
+
+    class Bumper {
+      start() {}
+    }
+
+    class Car {
+      constructor(e: Engine, @Inject(Bumper) b) {
+        this.engine = e;
+        this.bumper = b;
+      }
+      start() {}
+    }
+
+    var i = new Injector([]);
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+    expect(car.engine).toBeInstanceOf(Engine);
+    expect(car.bumper).toBeInstanceOf(Bumper);
+  });
+
+
   it('should resolve dependencies', function() {
     var i = new Injector([carModule]);
     var car = i.get('Car');
