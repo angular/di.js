@@ -29,7 +29,8 @@ module.exports = function(config) {
 
     traceurPreprocessor: {
       options: {
-        modules: 'requirejs',
+        modules: 'amd',
+        types: true,
         annotations: true,
         sourceMap: true
       }
