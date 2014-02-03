@@ -11,8 +11,18 @@ npm install -g grunt-cli
 ```
 
 ### Running the [tests](./test/)
+
 ```bash
 karma start
+```
+
+In your Chrome, be sure to enable Harmony support and relaunch, if you haven't
+done so: chrome://flags/#enable-javascript-harmony
+
+Then run the test suite:
+
+```bash
+karma run
 ```
 
 ### Transpiling ES6
