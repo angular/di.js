@@ -45,7 +45,7 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector([]);
+    var i = new Injector();
     var car = i.get(Car);
 
     expect(car).toBeInstanceOf(Car);
