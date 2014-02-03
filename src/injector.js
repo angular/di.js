@@ -13,7 +13,7 @@ function isClass(clsOrFunction) {
 
 
 class Injector {
-  constructor(modules, parentInjector = null) {
+  constructor(modules = [], parentInjector = null) {
     this.providers = new Map();
     this.cache = new Map();
     this.parent = parentInjector;
