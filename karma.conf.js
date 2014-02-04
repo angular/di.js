@@ -18,7 +18,8 @@ module.exports = function(config) {
 
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
-      {pattern: 'example/coffee/*.js', included: false}
+      {pattern: 'example/coffee/*.js', included: false},
+      {pattern: 'node_modules/es6-shim/es6-shim.js', included: false}
     ],
 
     preprocessors: {
@@ -61,7 +62,7 @@ module.exports = function(config) {
 
 
     // Start these browsers:
-    browsers: ['Chrome_harmony'],
+    browsers: ['Chrome'],
 
     customLaunchers: {
       'Chrome_harmony': {
