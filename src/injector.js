@@ -13,9 +13,9 @@ function isClass(clsOrFunction) {
 
 
 class Injector {
-  constructor(modules = [], parentInjector = null) {
-    this.providers = new Map();
+  constructor(modules = [], parentInjector = null, providers = new Map()) {
     this.cache = new Map();
+    this.providers = providers;
     this.parent = parentInjector;
     this.id = getUniqueId();
 
@@ -33,12 +33,29 @@ class Injector {
     }
   }
 
+  _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
+    this.providers.forEach((provider, token) => {
+      // TODO(vojta): move to annotations
+      if (provider.provider.annotations) {
+        for (var annotation of provider.provider.annotations) {
+          if (annotation instanceof annotationClass && !collectedProviders.has(token)) {
+            collectedProviders.set(token, provider);
+          }
+        }
+      }
+    });
+
+    if (this.parent) {
+      this.parent._collectProvidersWithAnnotation(annotationClass, collectedProviders);
+    }
+  }
+
   _loadProvider(provider, key) {
     if (typeof provider !== 'function') {
       return;
     }
 
-    var token = getProvideAnnotation(provider) || key;
+    var token = getProvideAnnotation(provider) || key || provider;
 
     this.providers.set(token, {
       provider: provider,
@@ -69,6 +86,18 @@ class Injector {
     return params;
   }
 
+  _hasProviderFor(token) {
+    if (this.providers.has(token)) {
+      return true;
+    }
+
+    if (this.parent) {
+      return this.parent._hasProviderFor(token);
+    }
+
+    return false;
+  }
+
   get(token, resolving = []) {
     var defaultProvider = null;
 
@@ -83,7 +112,7 @@ class Injector {
     var provider = this.providers.get(token);
     var resolvingMsg = '';
 
-    if (!provider && defaultProvider) {
+    if (!provider && defaultProvider && !this._hasProviderFor(token)) {
       provider = {
         provider: defaultProvider,
         params: this._getInjectTokens(defaultProvider),
@@ -135,8 +164,14 @@ class Injector {
 
   }
 
-  createChild(modules = []) {
-    return new Injector(modules, this);
+  createChild(modules = [], forceNewInstancesOf = []) {
+    var forcedProviders = new Map();
+
+    for (var annotation of forceNewInstancesOf) {
+      this._collectProvidersWithAnnotation(annotation, forcedProviders);
+    }
+
+    return new Injector(modules, this, forcedProviders);
   }
 
 

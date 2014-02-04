@@ -228,6 +228,101 @@ describe('injector', function() {
     });
 
 
+    it('should force new instances by annotation', function() {
+      class RouteScope {}
+
+      class Engine {
+        start() {}
+      }
+
+      @RouteScope
+      @Inject(Engine)
+      class Car {
+        constructor(engine) {
+          this.engine = engine;
+        }
+
+        start() {}
+      }
+
+      var parent = new Injector([Car, Engine]);
+      var child = parent.createChild([], [RouteScope]);
+
+      var carFromParent = parent.get(Car);
+      var carFromChild = child.get(Car);
+
+      expect(carFromChild).not.toBe(carFromParent);
+      expect(carFromChild.engine).toBe(carFromParent.engine);
+    });
+
+
+    it('should force new instances by annotation using overriden provider', function() {
+      class RouteScope {}
+
+      class Engine {
+        start() {}
+      }
+
+      @RouteScope
+      @Provide(Engine)
+      class MockEngine {
+        start() {}
+      }
+
+      var parent = new Injector([MockEngine]);
+      var childA = parent.createChild([], [RouteScope]);
+      var childB = parent.createChild([], [RouteScope]);
+
+      var engineFromA = childA.get(Engine);
+      var engineFromB = childB.get(Engine);
+
+      expect(engineFromA).not.toBe(engineFromB);
+      expect(engineFromA).toBeInstanceOf(MockEngine);
+      expect(engineFromB).toBeInstanceOf(MockEngine);
+    });
+
+
+    it('should force new instance by annotation using the lowest overriden provider', function() {
+      class RouteScope {}
+
+      @RouteScope
+      class Engine {
+        constructor() {
+          "engine"
+        }
+        start() {}
+      }
+
+      @RouteScope
+      @Provide(Engine)
+      class MockEngine {
+        constructor() {
+          "mock engine"
+        }
+        start() {}
+      }
+
+      @RouteScope
+      @Provide(Engine)
+      class DoubleMockEngine {
+        start() {}
+      }
+
+      var parent = new Injector([Engine]);
+      var child = parent.createChild([MockEngine]);
+      var grantChild = child.createChild([], [RouteScope]);
+
+      var engineFromParent = parent.get(Engine);
+      var engineFromChild = child.get(Engine);
+      var engineFromGrantChild = grantChild.get(Engine);
+
+      expect(engineFromParent).toBeInstanceOf(Engine);
+      expect(engineFromChild).toBeInstanceOf(MockEngine);
+      expect(engineFromGrantChild).toBeInstanceOf(MockEngine);
+      expect(engineFromGrantChild).not.toBe(engineFromChild);
+    });
+
+
     it('should show the full path when no provider', function() {
       var i = new Injector([houseModule]);
       var child = i.createChild([shinyHouseModule]);
