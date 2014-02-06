@@ -19,7 +19,7 @@ gulp.task('build_source_amd', function() {
 
 gulp.task('build_source_cjs', function() {
   gulp.src(path.src)
-      .pipe(pipe.traceur({modules: 'cjs'}))
+      .pipe(pipe.traceur({modules: 'commonjs'}))
       .pipe(gulp.dest('dist/cjs'));
 });
 
