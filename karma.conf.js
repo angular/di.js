@@ -1,17 +1,9 @@
-// Karma configuration
-// Generated on Tue Dec 17 2013 15:03:33 GMT-0800 (PST)
+var sharedConfid = require('pipe/karma');
 
 module.exports = function(config) {
+  sharedConfid(config);
+
   config.set({
-
-    // base path, that will be used to resolve files and exclude
-    basePath: '',
-
-
-    // frameworks to use
-    frameworks: ['jasmine', 'traceur', 'requirejs'],
-
-
     // list of files / patterns to load in the browser
     files: [
       'test-main.js',
@@ -26,49 +18,8 @@ module.exports = function(config) {
       'src/**/*.js': ['traceur'],
       'test/**/*.js': ['traceur'],
       'example/**/*.js': ['traceur']
-    },
-
-    traceurPreprocessor: {
-      options: {
-        modules: 'amd',
-        types: true,
-        annotations: true,
-        sourceMap: true
-      }
-    },
-
-
-    // list of files to exclude
-    exclude: [],
-
-
-    // test results reporter to use
-    // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress'],
-
-
-    // web server port
-    port: 9876,
-
-
-    // level of logging
-    // possible values:
-    // - config.LOG_DISABLE
-    // - config.LOG_ERROR
-    // - config.LOG_WARN
-    // - config.LOG_INFO
-    // - config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
-
-
-    // Start these browsers:
-    browsers: ['Chrome'],
-
-    customLaunchers: {
-      'Chrome_harmony': {
-        base: 'Chrome',
-        flags: ['--js-flags=--harmony']
-      }
     }
   });
+
+  config.sauceLabs.testName = 'di.js';
 };
