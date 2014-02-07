@@ -5,33 +5,23 @@ module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
 module shinyHouseModule from './fixtures/shiny_house';
 
-
-
-
-// TODO(vojta): move matchers somewhere ;-)
-beforeEach(function() {
-  this.addMatchers({
-    toBeInstanceOf: function(expectedClass) {
-      // TODO(vojta): support not.toBeInstanceOf
-      if (this.isNot) {
-        throw new Error('not.toBeInstanceOf is not supported!');
-      }
-
-      var actual = this.actual;
-
-      this.message = function() {
-        return 'Expected ' + jasmine.pp(actual) + ' to be an instance of ' + jasmine.pp(expectedClass);
-      };
-
-      return typeof this.actual === 'object' && this.actual instanceof expectedClass;
-    }
-  });
-});
-
-
+// TODO(vojta): refactor to not use strings once we can do toString() on classes
 describe('injector', function() {
 
-  it('should work with fn annotations', function() {
+  it('should instantiate a class without dependencies', function() {
+    class Car {
+      constructor() {}
+      start() {}
+    }
+
+    var i = new Injector();
+    var car = i.get(Car);
+
+    expect(car).toBeInstanceOf(Car);
+  });
+
+
+  it('should resolve dependencies based on @Inject annotation', function() {
     class Engine {
       start() {}
     }
@@ -52,7 +42,8 @@ describe('injector', function() {
     expect(car.engine).toBeInstanceOf(Engine);
   });
 
-  it('should load providers', function() {
+
+  it('should override providers', function() {
     class Engine {
       start() {}
     }
@@ -124,7 +115,7 @@ describe('injector', function() {
   });
 
 
-  it('should use mixed @Inject type annotations', function() {
+  it('should use mixed @Inject with type annotations', function() {
     class Engine {
       start() {}
     }
@@ -150,32 +141,28 @@ describe('injector', function() {
   });
 
 
-  it('should resolve dependencies', function() {
-    var i = new Injector([carModule]);
-    var car = i.get('Car');
-
-    expect(car).toBeInstanceOf(carModule.Car);
-    expect(car.engine).toBe('strong engine');
-  });
-
-
   it('should cache instances', function() {
-    var i = new Injector([carModule]);
-    var car = i.get('Car');
+    class Car {
+      constructor() {}
+      start() {}
+    }
 
-    expect(i.get('Car')).toBe(car);
+    var i = new Injector();
+    var car = i.get(Car);
+
+    expect(i.get(Car)).toBe(car);
   });
 
 
-  it('should throw when no provider', function() {
-    var i = new Injector([]);
+  it('should throw when no provider defined', function() {
+    var i = new Injector();
 
     expect(() => i.get('NonExisting'))
         .toThrow('No provider for NonExisting!');
   });
 
 
-  it('should show the full path when no provider', function() {
+  it('should show the full path when no provider defined', function() {
     var i = new Injector([houseModule]);
 
     expect(() => i.get('House'))
@@ -198,30 +185,35 @@ describe('injector', function() {
   describe('child', function() {
 
     it('should load instances from parent injector', function() {
-      var parent = new Injector([carModule]);
+      class Car {
+        start() {}
+      }
+
+      var parent = new Injector([Car]);
       var child = parent.createChild([]);
 
-      var carFromParent = parent.get('Car');
-      var carFromChild = child.get('Car');
+      var carFromParent = parent.get(Car);
+      var carFromChild = child.get(Car);
 
       expect(carFromChild).toBe(carFromParent);
     });
 
 
-    it('should override providers in a child injector', function() {
-      class MockCar {
-        run() {}
+    it('should create new instance in a child injector', function() {
+      class Car {
+        start() {}
       }
 
-      var mockCarModule = {
-        Car: MockCar
-      };
+      @Provide(Car)
+      class MockCar {
+        start() {}
+      }
 
-      var parent = new Injector([carModule]);
-      var child = parent.createChild([mockCarModule]);
+      var parent = new Injector([Car]);
+      var child = parent.createChild([MockCar]);
 
-      var carFromParent = parent.get('Car');
-      var carFromChild = child.get('Car');
+      var carFromParent = parent.get(Car);
+      var carFromChild = child.get(Car);
 
       expect(carFromParent).not.toBe(carFromChild);
       expect(carFromChild).toBeInstanceOf(MockCar);
@@ -287,18 +279,14 @@ describe('injector', function() {
 
       @RouteScope
       class Engine {
-        constructor() {
-          "engine"
-        }
+        constructor() {}
         start() {}
       }
 
       @RouteScope
       @Provide(Engine)
       class MockEngine {
-        constructor() {
-          "mock engine"
-        }
+        constructor() {}
         start() {}
       }
 
