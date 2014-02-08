@@ -18,6 +18,14 @@ function isClass(clsOrFunction) {
   return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
+function isFunction(value) {
+  return typeof value === 'function';
+}
+
+function isObject(value) {
+  return typeof value === 'object';
+}
+
 function toString(token) {
   if (typeof token === 'string') {
     return token;
@@ -40,7 +48,7 @@ class Injector {
 
     for (var module of modules) {
       // A single provider.
-      if (typeof module === 'function') {
+      if (isFunction(module)) {
         this._loadProvider(module);
         continue;
       }
@@ -70,7 +78,7 @@ class Injector {
   }
 
   _loadProvider(provider, key) {
-    if (typeof provider !== 'function') {
+    if (!isFunction(provider)) {
       return;
     }
 
@@ -92,7 +100,7 @@ class Injector {
     if (provider.parameters) {
       provider.parameters.forEach((param, idx) => {
         for (var paramAnnotation of param) {
-          if (typeof paramAnnotation === 'function' && !params[idx]) {
+          if (isFunction(paramAnnotation) && !params[idx]) {
             params[idx] = paramAnnotation;
           } else if (paramAnnotation instanceof Inject) {
             params[idx] = paramAnnotation.params[0];
@@ -120,7 +128,7 @@ class Injector {
   get(token, resolving = []) {
     var defaultProvider = null;
 
-    if (typeof token === 'function') {
+    if (isFunction(token)) {
       defaultProvider = token;
     }
 
@@ -180,7 +188,7 @@ class Injector {
       throw e;
     }
 
-    if (provider.isClass && typeof instance !== 'function' && typeof instance !== 'object') {
+    if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
       instance = context;
     }
 
