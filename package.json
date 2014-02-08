@@ -20,7 +20,7 @@
     "gulp-connect": "~0.3.0"
   },
   "scripts": {
-    "test": "./node_modules/gulp/bin/gulp.js test"
+    "test": "karma start --single-run"
   },
   "author": "Vojta Jína <vojta.jina@gmail.com>",
   "license": "Apache-2.0"
