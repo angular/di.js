@@ -182,6 +182,29 @@ describe('injector', function() {
   });
 
 
+  it('should show the full path when error happens in a constructor', function() {
+    @Provide('Engine')
+    class BrokenEngine {
+      constructor() {
+        throw new Error('This engine is broken!');
+      }
+    }
+
+    @Provide('Car')
+    @Inject('Engine')
+    class Car {
+      constructor(e) {
+        throw new Error('This car is broken!');
+      }
+    }
+
+    var injector = new Injector([BrokenEngine, Car]);
+
+    expect(() => injector.get('Car'))
+      .toThrow(/Error during instantiation of Engine! \(Car -> Engine\)/);
+  });
+
+
   describe('child', function() {
 
     it('should load instances from parent injector', function() {

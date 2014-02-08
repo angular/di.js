@@ -152,7 +152,15 @@ class Injector {
       context = Object.create(provider.provider.prototype);
     }
 
-    var instance = provider.provider.apply(context, args) || context;
+    try {
+      var instance = provider.provider.apply(context, args) || context;
+    } catch (e) {
+      resolvingMsg = ` (${resolving.join(' -> ')})`;
+      var originalMsg = 'ORIGINAL ERROR: ' + e.message;
+      e.message = `Error during instantiation of ${token}!${resolvingMsg}\n${originalMsg}`
+      throw e;
+    }
+
 
     this.cache.set(token, instance);
     resolving.pop();
