@@ -183,24 +183,20 @@ describe('injector', function() {
 
 
   it('should show the full path when error happens in a constructor', function() {
-    @Provide('Engine')
-    class BrokenEngine {
+    class Engine {
       constructor() {
         throw new Error('This engine is broken!');
       }
     }
 
-    @Provide('Car')
-    @Inject('Engine')
+    @Inject(Engine)
     class Car {
-      constructor(e) {
-        throw new Error('This car is broken!');
-      }
+      constructor(e) {}
     }
 
-    var injector = new Injector([BrokenEngine, Car]);
+    var injector = new Injector();
 
-    expect(() => injector.get('Car'))
+    expect(() => injector.get(Car))
       .toThrow(/Error during instantiation of Engine! \(Car -> Engine\)/);
   });
 

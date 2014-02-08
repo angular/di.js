@@ -11,6 +11,18 @@ function isClass(clsOrFunction) {
   return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
+function toString(token) {
+  if (typeof token === 'string') {
+    return token;
+  }
+
+  if (token.name) {
+    return token.name;
+  }
+
+  return token.toString();
+}
+
 
 class Injector {
   constructor(modules = [], parentInjector = null, providers = new Map()) {
@@ -124,10 +136,10 @@ class Injector {
       if (!this.parent) {
         if (resolving.length) {
           resolving.push(token);
-          resolvingMsg = ` (${resolving.join(' -> ')})`;
+          resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
         }
 
-        throw new Error(`No provider for ${token}!${resolvingMsg}`);
+        throw new Error(`No provider for ${toString(token)}!${resolvingMsg}`);
       }
 
       return this.parent.get(token, resolving);
@@ -136,7 +148,7 @@ class Injector {
     if (resolving.indexOf(token) !== -1) {
       if (resolving.length) {
         resolving.push(token);
-        resolvingMsg = ` (${resolving.join(' -> ')})`;
+        resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
       }
       throw new Error(`Cannot instantiate cyclic dependency!${resolvingMsg}`);
     }
@@ -155,9 +167,9 @@ class Injector {
     try {
       var instance = provider.provider.apply(context, args) || context;
     } catch (e) {
-      resolvingMsg = ` (${resolving.join(' -> ')})`;
+      resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
       var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-      e.message = `Error during instantiation of ${token}!${resolvingMsg}\n${originalMsg}`
+      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`
       throw e;
     }
 
