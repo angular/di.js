@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/angular/di.js.png?branch=master)](https://travis-ci.org/angular/di.js)
+
 ## Dependency Injection v2
 
 This readme describes how to set up your working space in order to run the tests and hack on it. See [How can I use it](./docs/how-can-i-use-it.md) on how to use this DI framework in your project.
