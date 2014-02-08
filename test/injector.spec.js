@@ -21,6 +21,21 @@ describe('injector', function() {
   });
 
 
+  it('should allow factory function', function() {
+    class Size {}
+
+    @Provide(Size)
+    function computeSize() {
+      return 0;
+    }
+
+    var i = new Injector([computeSize]);
+    var size = i.get(Size);
+
+    expect(size).toBe(0);
+  });
+
+
   it('should resolve dependencies based on @Inject annotation', function() {
     class Engine {
       start() {}

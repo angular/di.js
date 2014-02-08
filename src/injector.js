@@ -6,8 +6,15 @@ function getUniqueId() {
   return ++globalCounter;
 }
 
-// TODO(vojta): this is super lame, figure out something better.
+function isUpperCase(char) {
+  return char.toUpperCase() === char;
+}
+
 function isClass(clsOrFunction) {
+  if (clsOrFunction.name) {
+    return isUpperCase(clsOrFunction.name.charAt(0));
+  }
+
   return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
@@ -165,7 +172,7 @@ class Injector {
     }
 
     try {
-      var instance = provider.provider.apply(context, args) || context;
+      var instance = provider.provider.apply(context, args);
     } catch (e) {
       resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
       var originalMsg = 'ORIGINAL ERROR: ' + e.message;
@@ -173,6 +180,9 @@ class Injector {
       throw e;
     }
 
+    if (provider.isClass && typeof instance !== 'function' && typeof instance !== 'object') {
+      instance = context;
+    }
 
     this.cache.set(token, instance);
     resolving.pop();
