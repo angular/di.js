@@ -14,25 +14,10 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector();
-    var car = i.get(Car);
+    var injector = new Injector();
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
-  });
-
-
-  it('should allow factory function', function() {
-    class Size {}
-
-    @Provide(Size)
-    function computeSize() {
-      return 0;
-    }
-
-    var i = new Injector([computeSize]);
-    var size = i.get(Size);
-
-    expect(size).toBe(0);
   });
 
 
@@ -50,8 +35,8 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector();
-    var car = i.get(Car);
+    var injector = new Injector();
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(Engine);
@@ -77,11 +62,26 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector([MockEngine]);
-    var car = i.get(Car);
+    var injector = new Injector([MockEngine]);
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(MockEngine);
+  });
+
+
+  it('should allow factory function', function() {
+    class Size {}
+
+    @Provide(Size)
+    function computeSize() {
+      return 0;
+    }
+
+    var injector = new Injector([computeSize]);
+    var size = injector.get(Size);
+
+    expect(size).toBe(0);
   });
 
 
@@ -97,8 +97,8 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector([]);
-    var car = i.get(Car);
+    var injector = new Injector([]);
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(Engine);
@@ -122,8 +122,8 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector([]);
-    var car = i.get(Car);
+    var injector = new Injector([]);
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(MockEngine);
@@ -147,8 +147,8 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector([]);
-    var car = i.get(Car);
+    var injector = new Injector([]);
+    var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
     expect(car.engine).toBeInstanceOf(Engine);
@@ -162,25 +162,25 @@ describe('injector', function() {
       start() {}
     }
 
-    var i = new Injector();
-    var car = i.get(Car);
+    var injector = new Injector();
+    var car = injector.get(Car);
 
-    expect(i.get(Car)).toBe(car);
+    expect(injector.get(Car)).toBe(car);
   });
 
 
   it('should throw when no provider defined', function() {
-    var i = new Injector();
+    var injector = new Injector();
 
-    expect(() => i.get('NonExisting'))
+    expect(() => injector.get('NonExisting'))
         .toThrow('No provider for NonExisting!');
   });
 
 
   it('should show the full path when no provider defined', function() {
-    var i = new Injector([houseModule]);
+    var injector = new Injector([houseModule]);
 
-    expect(() => i.get('House'))
+    expect(() => injector.get('House'))
         .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
   });
 
@@ -190,9 +190,9 @@ describe('injector', function() {
       Engine: carModule.CyclicEngine
     };
 
-    var i = new Injector([carModule, useCyclicEngineModule]);
+    var injector = new Injector([carModule, useCyclicEngineModule]);
 
-    expect(() => i.get('Car'))
+    expect(() => injector.get('Car'))
         .toThrow('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
   });
 
@@ -346,8 +346,8 @@ describe('injector', function() {
 
 
     it('should show the full path when no provider', function() {
-      var i = new Injector([houseModule]);
-      var child = i.createChild([shinyHouseModule]);
+      var parent = new Injector([houseModule]);
+      var child = parent.createChild([shinyHouseModule]);
 
       expect(() => child.get('House'))
           .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
