@@ -1,8 +1,10 @@
 test
 visualize
 *.sublime-project
-Gruntfile.*
+*.sublime-workspace
+gulpfile.js
 karma.conf.js
+.travis.yml
 index.html
 test-main.js
 .npmignore
