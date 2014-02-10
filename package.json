@@ -17,7 +17,8 @@
   },
   "devDependencies": {
     "pipe": "git://github.com/angular/pipe#master",
-    "gulp-connect": "~0.3.0"
+    "gulp-connect": "~0.3.0",
+    "requirejs": "2.1.10"
   },
   "scripts": {
     "test": "karma start --single-run"

@@ -6,7 +6,7 @@ var connect = require('gulp-connect');
 var path = {
   src: './src/**/*.js',
   // we have to skip example/node (because of the cyclic symlink)
-  examples: './example/!(node)/*.js'
+  examples: './example/!(node)/**/*.js'
 };
 
 

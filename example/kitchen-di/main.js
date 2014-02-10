@@ -1,4 +1,4 @@
-import {Injector} from '../../src/injector';
+import {Injector} from 'di/injector';
 import {Kitchen} from './kitchen';
 import {MockHeater} from './mock_heater';
 

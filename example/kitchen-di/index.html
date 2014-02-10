@@ -6,7 +6,7 @@
     Kitchen example, transpiled on the server into RequireJS.
 
     <!-- Traceur runtime -->
-    <script src="../../node_modules/traceur/src/runtime/runtime.js"></script>
+    <script src="../../node_modules/traceur/bin/traceur-runtime.js"></script>
     <!-- Map shim -->
     <script src="../../node_modules/es6-shim/es6-shim.js"></script>
     <!-- RequireJS -->
@@ -16,6 +16,9 @@
 
       require.config({
         baseUrl: '../../compiled',
+        paths: {
+          'di': '../dist/amd/'
+        },
         deps: ['example/kitchen-di/main']
       });
 

@@ -1,4 +1,4 @@
-import {Inject} from '../../src/annotations';
+import {Inject} from 'di/annotations';
 import {CoffeeMaker} from './coffee_maker/coffee_maker';
 import {Skillet} from './skillet';
 import {Stove} from './stove';
