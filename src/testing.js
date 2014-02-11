@@ -47,6 +47,10 @@ function use(mock) {
   };
 
   fn.as = function(token) {
+    if (currentSpec && currentSpec.$$injector) {
+      throw new Error('Cannot call as() after inject() has already been called.');
+    }
+
     providerWrapper.as = token;
     if (isRunning()) {
       return undefined;
