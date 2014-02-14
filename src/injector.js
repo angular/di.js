@@ -199,7 +199,12 @@ class Injector {
   }
 
   invoke(fn, context) {
+    var resolving = [];
+    var args = this._getInjectTokens(fn).map((token) => {
+      return this.get(token, resolving);
+    });
 
+    return fn.apply(context, args);
   }
 
   createChild(modules = [], forceNewInstancesOf = []) {
