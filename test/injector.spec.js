@@ -173,7 +173,7 @@ describe('injector', function() {
     var injector = new Injector();
 
     expect(() => injector.get('NonExisting'))
-        .toThrow('No provider for NonExisting!');
+        .toThrowError('No provider for NonExisting!');
   });
 
 
@@ -181,7 +181,7 @@ describe('injector', function() {
     var injector = new Injector([houseModule]);
 
     expect(() => injector.get('House'))
-        .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
+        .toThrowError('No provider for Sink! (House -> Kitchen -> Sink)');
   });
 
 
@@ -193,7 +193,7 @@ describe('injector', function() {
     var injector = new Injector([carModule, useCyclicEngineModule]);
 
     expect(() => injector.get('Car'))
-        .toThrow('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
+        .toThrowError('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
   });
 
 
@@ -212,7 +212,7 @@ describe('injector', function() {
     var injector = new Injector();
 
     expect(() => injector.get(Car))
-      .toThrow(/Error during instantiation of Engine! \(Car -> Engine\)/);
+      .toThrowError(/Error during instantiation of Engine! \(Car -> Engine\)/);
   });
 
 
@@ -350,7 +350,7 @@ describe('injector', function() {
       var child = parent.createChild([shinyHouseModule]);
 
       expect(() => child.get('House'))
-          .toThrow('No provider for Sink! (House -> Kitchen -> Sink)');
+          .toThrowError('No provider for Sink! (House -> Kitchen -> Sink)');
     });
   });
 });
