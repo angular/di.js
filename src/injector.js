@@ -1,4 +1,4 @@
-import {getProvideAnnotation, getInjectAnnotation, Inject} from './annotations';
+import {getProvideAnnotation, getInjectAnnotation, Inject, getInjectTokens} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 
 
@@ -55,31 +55,9 @@ class Injector {
 
     this.providers.set(token, {
       provider: provider,
-      params: this._getInjectTokens(provider),
+      params: getInjectTokens(provider),
       isClass: isClass(provider)
     });
-  }
-
-  // TODO(vojta): move this to annotations.
-  _getInjectTokens(provider) {
-    // Read the @Inject annotation on the class / function.
-    var params = getInjectAnnotation(provider) || [];
-
-    // Read the annotations on individual parameters.
-    if (provider.parameters) {
-      provider.parameters.forEach((param, idx) => {
-        for (var paramAnnotation of param) {
-          if (isFunction(paramAnnotation) && !params[idx]) {
-            params[idx] = paramAnnotation;
-          } else if (paramAnnotation instanceof Inject) {
-            params[idx] = paramAnnotation.params[0];
-            continue;
-          }
-        }
-      });
-    }
-
-    return params;
   }
 
   _hasProviderFor(token) {
@@ -111,7 +89,7 @@ class Injector {
     if (!provider && defaultProvider && !this._hasProviderFor(token)) {
       provider = {
         provider: defaultProvider,
-        params: this._getInjectTokens(defaultProvider),
+        params: getInjectTokens(defaultProvider),
         isClass: isClass(defaultProvider)
       };
     }
