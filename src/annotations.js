@@ -1,3 +1,5 @@
+import {isFunction} from './util';
+
 class InjectAnnotation {
   constructor(...params) {
     this.params = params;
@@ -53,6 +55,28 @@ function getInjectAnnotation(provider) {
   return null;
 }
 
+function getInjectTokens(provider) {
+  // Read the @Inject annotation on the class / function.
+  var params = getInjectAnnotation(provider) || [];
+
+  // Read the annotations on individual parameters.
+  if (provider.parameters) {
+    provider.parameters.forEach((param, idx) => {
+      for (var paramAnnotation of param) {
+        if (isFunction(paramAnnotation) && !params[idx]) {
+          params[idx] = paramAnnotation;
+        } else if (paramAnnotation instanceof Inject) {
+          params[idx] = paramAnnotation.params[0];
+          continue;
+        }
+      }
+    });
+  }
+
+  return params;
+}
+
+
 export {
   annotate,
   Inject,
@@ -60,5 +84,6 @@ export {
   Provide,
   ProvideAnnotation,
   getInjectAnnotation,
-  getProvideAnnotation
+  getProvideAnnotation,
+  getInjectTokens
 }

@@ -1,6 +1,5 @@
 import {Injector} from './injector';
-import {Inject, annotate, getProvideAnnotation} from './annotations';
-
+import {Inject, annotate, getProvideAnnotation, getInjectTokens} from './annotations';
 
 var currentSpec = null;
 beforeEach(function() {
@@ -17,9 +16,6 @@ afterEach(function() {
 function isRunning() {
   return !!currentSpec;
 }
-
-// TODO(vojta): refactor this shit, this is awful.
-var fakeInjector = new Injector();
 
 function isUpperCase(char) {
   return char.toUpperCase() === char;
@@ -92,7 +88,7 @@ function inject(...params) {
             // a fn/class provider with overriden token
             providers.set(providerWrapper.as, {
               provider: providerWrapper.provider,
-              params: fakeInjector._getInjectTokens(providerWrapper.provider),
+              params: getInjectTokens(providerWrapper.provider),
               isClass: isClass(providerWrapper.provider)
             });
           }
