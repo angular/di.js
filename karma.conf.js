@@ -1,7 +1,7 @@
-var sharedConfid = require('pipe/karma');
+var sharedConfig = require('pipe/karma');
 
 module.exports = function(config) {
-  sharedConfid(config);
+  sharedConfig(config);
 
   config.set({
     // list of files / patterns to load in the browser
