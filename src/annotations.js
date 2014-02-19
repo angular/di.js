@@ -1,5 +1,7 @@
 import {isFunction} from './util';
 
+class SuperConstructor {}
+
 class InjectAnnotation {
   constructor(...params) {
     this.params = params;
@@ -79,6 +81,7 @@ function getInjectTokens(provider) {
 
 export {
   annotate,
+  SuperConstructor,
   Inject,
   InjectAnnotation,
   Provide,

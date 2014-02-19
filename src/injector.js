@@ -1,4 +1,4 @@
-import {getProvideAnnotation, getInjectAnnotation, Inject, getInjectTokens} from './annotations';
+import {getProvideAnnotation, getInjectAnnotation, Inject, SuperConstructor, getInjectTokens} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 
 
@@ -7,6 +7,8 @@ var globalCounter = 0;
 function getUniqueId() {
   return ++globalCounter;
 }
+
+var EmptyFunction = Function.__proto__;
 
 class Injector {
   constructor(modules = [], parentInjector = null, providers = new Map()) {
@@ -117,14 +119,39 @@ class Injector {
 
     resolving.push(token);
 
-    var args = provider.params.map((token) => {
-      return this.get(token, resolving);
-    });
     var context = undefined;
 
     if (provider.isClass) {
       context = Object.create(provider.provider.prototype);
     }
+
+    var injector = this;
+    var args = provider.params.map((token) => {
+      // TODO(vojta): should be only allowed during the constructor?
+      if (token === SuperConstructor) {
+        var superConstructor = provider.provider.__proto__;
+
+        if (superConstructor === EmptyFunction) {
+          resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+          throw new Error(`Only classes with a parent can ask for SuperConstructor!${resolvingMsg}`);
+        }
+
+        return function() {
+          if (arguments.length > 0) {
+            resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+            throw new Error(`SuperConstructor does not accept any arguments!${resolvingMsg}`);
+          }
+
+          var superArgs = getInjectTokens(superConstructor).map((token) => {
+            return injector.get(token, resolving);
+          });
+
+          superConstructor.apply(context, superArgs);
+        }
+      }
+      return this.get(token, resolving);
+    });
+
 
     try {
       var instance = provider.provider.apply(context, args);

@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject, Provide} from '../src/annotations';
+import {Inject, Provide, SuperConstructor} from '../src/annotations';
 
 module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
@@ -213,6 +213,62 @@ describe('injector', function() {
 
     expect(() => injector.get(Car))
       .toThrowError(/Error during instantiation of Engine! \(Car -> Engine\)/);
+  });
+
+
+  it('should support "super" to call a parent constructor', function() {
+    class Something {}
+
+    class Parent {
+      @Inject(Something)
+      constructor(something) {
+        this.parentSomething = something;
+      }
+    }
+
+    @Inject(SuperConstructor, Something)
+    class Child extends Parent {
+      constructor(superConstructor, something) {
+        superConstructor();
+        this.childSomething = something;
+      }
+    }
+
+    var injector = new Injector();
+    var instance = injector.get(Child);
+
+    expect(instance.parentSomething).toBeInstanceOf(Something);
+    expect(instance.childSomething).toBeInstanceOf(Something);
+    expect(instance.childSomething).toBe(instance.parentSomething);
+  });
+
+
+  it('should throw an error when used in a factory function', function() {
+    class Something {}
+
+    @Provide(Something)
+    @Inject(SuperConstructor)
+    function createSomething(parent) {
+      console.log('init', parent)
+    }
+
+    var injector = new Injector([createSomething]);
+
+    expect(function() {
+      injector.get(Something);
+    }).toThrowError(/Only classes with a parent can ask for SuperConstructor!/);
+  });
+
+
+  it('should throw an error when used in a class without any parent', function() {
+    @Inject(SuperConstructor)
+    class WithoutParent {}
+
+    var injector = new Injector();
+
+    expect(function() {
+      injector.get(WithoutParent);
+    }).toThrowError(/Only classes with a parent can ask for SuperConstructor!/);
   });
 
 
