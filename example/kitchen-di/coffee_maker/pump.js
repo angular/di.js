@@ -10,6 +10,6 @@ export class Pump {
   }
 
   pump() {
-    console.log('Pumping the watter...');
+    console.log('Pumping the water...');
   }
 }
