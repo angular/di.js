@@ -1,12 +1,7 @@
 import {getProvideAnnotation, getInjectAnnotation, Inject, SuperConstructor, getInjectTokens} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
+import {getUniqueId} from './profiler';
 
-
-// TODO(vojta): move to profiler/debug module
-var globalCounter = 0;
-function getUniqueId() {
-  return ++globalCounter;
-}
 
 var EmptyFunction = Function.__proto__;
 
