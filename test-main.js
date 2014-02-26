@@ -16,6 +16,10 @@ require.config({
   // Karma serves files under /base, which is the basePath from your config file
   baseUrl: '/base',
 
+  paths: {
+    'assert': '/base/node_modules/assert/src/assert'
+  },
+
   // Dynamically load all test files and ES6 polyfill.
   deps: allTestFiles.concat(['node_modules/es6-shim/es6-shim', 'test/matchers']),
 

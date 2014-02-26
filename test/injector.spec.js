@@ -110,7 +110,7 @@ describe('injector', function() {
       start() {}
     }
 
-    class MockEngine {
+    class MockEngine extends Engine {
       start() {}
     }
 
