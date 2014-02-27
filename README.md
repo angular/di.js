@@ -43,6 +43,9 @@ gulp build_examples
 gulp serve
 ```
 
+### Cookbook
+
+ * [Mocking with DI](recipes/mocking.md)
 
 ### More stuff
 
