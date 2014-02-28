@@ -272,6 +272,13 @@ describe('injector', function() {
   });
 
 
+  it('should provide itself', function() {
+    var injector = new Injector();
+
+    expect(injector.get(Injector)).toBe(injector);
+  });
+
+
   describe('child', function() {
 
     it('should load instances from parent injector', function() {
@@ -407,6 +414,14 @@ describe('injector', function() {
 
       expect(() => child.get('House'))
           .toThrowError('No provider for Sink! (House -> Kitchen -> Sink)');
+    });
+
+
+    it('should provide itself', function() {
+      var parent = new Injector();
+      var child = parent.createChild([]);
+
+      expect(child.get(Injector)).toBe(child);
     });
   });
 });

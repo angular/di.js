@@ -82,6 +82,14 @@ class Injector {
       defaultProvider = token;
     }
 
+    if (token === Injector) {
+      if (wantPromise) {
+        return Q(this);
+      }
+
+      return this;
+    }
+
 
     if (this.cache.has(token)) {
       var instance = this.cache.get(token);
