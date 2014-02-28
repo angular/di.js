@@ -17,7 +17,8 @@ require.config({
   baseUrl: '/base',
 
   paths: {
-    'assert': '/base/node_modules/assert/src/assert'
+    'assert': '/base/node_modules/assert/src/assert',
+    'q': './node_modules/q/q'
   },
 
   // Dynamically load all test files and ES6 polyfill.

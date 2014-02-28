@@ -1,7 +1,9 @@
-import {getProvideAnnotation, getInjectAnnotation, Inject, SuperConstructor, getInjectTokens} from './annotations';
+import {getProvideAnnotation, getInjectAnnotation, Inject, SuperConstructor, getInjectTokens, readAnnotations} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
+// NOTE(vojta): should we rather use custom lightweight promise-like wrapper?
+module Q from 'q';
 
 var EmptyFunction = Function.__proto__;
 
@@ -48,11 +50,14 @@ class Injector {
       return;
     }
 
-    var token = getProvideAnnotation(provider) || key || provider;
+    var annotations = readAnnotations(provider);
+    var token = annotations.token || key || provider;
 
     this.providers.set(token, {
       provider: provider,
-      params: getInjectTokens(provider),
+      isPromise: annotations.isPromise,
+      params: annotations.argTokens,
+      paramsPromises: annotations.argPromises,
       isClass: isClass(provider)
     });
   }
@@ -69,26 +74,48 @@ class Injector {
     return false;
   }
 
-  get(token, resolving = []) {
+  get(token, resolving = [], wantPromise = false) {
     var defaultProvider = null;
+    var resolvingMsg = '';
 
     if (isFunction(token)) {
       defaultProvider = token;
     }
 
+
     if (this.cache.has(token)) {
-      return this.cache.get(token);
+      var instance = this.cache.get(token);
+
+      if (this.providers.get(token).isPromise) {
+        if (!wantPromise) {
+          if (resolving.length > 1) {
+            resolving.push(token);
+            resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+          }
+
+          throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
+        }
+      } else {
+        if (wantPromise) {
+          return Q(instance);
+        }
+      }
+      return instance;
     }
 
     var provider = this.providers.get(token);
-    var resolvingMsg = '';
 
     if (!provider && defaultProvider && !this._hasProviderFor(token)) {
+      var defaultProviderAnnotations = readAnnotations(defaultProvider);
       provider = {
         provider: defaultProvider,
-        params: getInjectTokens(defaultProvider),
+        isPromise: defaultProviderAnnotations.isPromise,
+        params: defaultProviderAnnotations.argTokens,
+        paramsPromises: defaultProviderAnnotations.argPromises,
         isClass: isClass(defaultProvider)
       };
+
+      this.providers.set(token, provider);
     }
 
     if (!provider) {
@@ -120,9 +147,20 @@ class Injector {
       context = Object.create(provider.provider.prototype);
     }
 
+    // TODO(vojta): handle these cases:
+    // 1/
+    // - requested as promise (delayed)
+    // - requested again as promise (before the previous gets resolved) -> cache the promise
+    // 2/
+    // - requested as promise (delayed)
+    // - requested again sync (before the previous gets resolved)
+    // -> error, but let it go inside to throw where exactly is the async provider
     var injector = this;
-    var args = provider.params.map((token) => {
+    var delayingInstantiation = wantPromise && provider.params.some((token, i) => !provider.paramsPromises[i]);
+
+    var args = provider.params.map((token, idx) => {
       // TODO(vojta): should be only allowed during the constructor?
+      // TODO(vojta): support async arguments for super constructor?
       if (token === SuperConstructor) {
         var superConstructor = provider.provider.__proto__;
 
@@ -138,14 +176,51 @@ class Injector {
           }
 
           var superArgs = getInjectTokens(superConstructor).map((token) => {
-            return injector.get(token, resolving);
+            return injector.get(token, resolving, false);
           });
 
           superConstructor.apply(context, superArgs);
         }
       }
-      return this.get(token, resolving);
+
+      if (delayingInstantiation) {
+        return this.get(token, resolving, true);
+      }
+
+      return this.get(token, resolving, provider.paramsPromises[idx]);
     });
+
+    if (delayingInstantiation) {
+      var delayedResolving = resolving.slice();
+
+      resolving.pop();
+
+      return Q.all(args).then(function(args) {
+        // TODO(vojta): do not repeat yourself ;-)
+        try {
+          var instance = provider.provider.apply(context, args);
+        } catch (e) {
+          resolvingMsg = ` (${delayedResolving.map(toString).join(' -> ')})`;
+          var originalMsg = 'ORIGINAL ERROR: ' + e.message;
+          e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`
+          throw e;
+        }
+
+        if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
+          instance = context;
+        }
+
+        injector.cache.set(token, instance);
+
+        // TODO(vojta): if a provider returns a promise (but is not declared as @ProvidePromise),
+        // here the value will get unwrapped (because it is returned from a promise callback) and
+        // the actual value will be injected. This is probably not desired behavior. Maybe we could
+        // get rid off the @ProvidePromise and just check the returned value, whether it is
+        // a promise or not.
+        return instance;
+
+      });
+    }
 
 
     try {
@@ -162,9 +237,26 @@ class Injector {
     }
 
     this.cache.set(token, instance);
+
+    if (!wantPromise && provider.isPromise) {
+      if (resolving.length > 1) {
+        resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+      }
+
+      throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
+    }
+
+    if (wantPromise && !provider.isPromise) {
+      instance = Q(instance);
+    }
+
     resolving.pop();
 
     return instance;
+  }
+
+  getPromise(token) {
+    return this.get(token, [], true);
   }
 
   invoke(fn, context) {
