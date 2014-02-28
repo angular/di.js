@@ -81,14 +81,18 @@ function inject(...params) {
             // inlined mock
             providers.set(providerWrapper.as, {
               provider: function() {return providerWrapper.provider},
+              isPromise: false,
               params: [],
+              paramsPromises: [],
               isClass: false
             });
           } else {
             // a fn/class provider with overriden token
             providers.set(providerWrapper.as, {
               provider: providerWrapper.provider,
+              isPromise: false, // TODO(vojta): parse annotations
               params: getInjectTokens(providerWrapper.provider),
+              paramsPromises: [], // TODO(vojta): parse annotations
               isClass: isClass(providerWrapper.provider)
             });
           }
