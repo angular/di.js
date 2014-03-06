@@ -1,5 +1,5 @@
 import {Injector} from './injector';
-import {Inject, annotate, getProvideAnnotation, getInjectTokens} from './annotations';
+import {Inject, annotate, readAnnotations} from './annotations';
 
 var currentSpec = null;
 beforeEach(function() {
@@ -71,6 +71,7 @@ function inject(...params) {
     if (!currentSpec.$$injector) {
       var providers = new Map();
       var modules = [];
+      var annotations;
 
       for (var providerWrapper of currentSpec.$$providers) {
         if (!providerWrapper.as) {
@@ -88,11 +89,12 @@ function inject(...params) {
             });
           } else {
             // a fn/class provider with overriden token
+            annotations = readAnnotations(providerWrapper.provider);
             providers.set(providerWrapper.as, {
               provider: providerWrapper.provider,
-              isPromise: false, // TODO(vojta): parse annotations
-              params: getInjectTokens(providerWrapper.provider),
-              paramsPromises: [], // TODO(vojta): parse annotations
+              isPromise: annotations.isPromise,
+              params: annotations.argTokens,
+              paramsPromises: annotations.argPromises,
               isClass: isClass(providerWrapper.provider)
             });
           }

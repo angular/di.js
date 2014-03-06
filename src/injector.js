@@ -1,4 +1,4 @@
-import {getProvideAnnotation, getInjectAnnotation, Inject, SuperConstructor, getInjectTokens, readAnnotations} from './annotations';
+import {SuperConstructor, readAnnotations, hasAnnotation} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
@@ -30,13 +30,8 @@ class Injector {
 
   _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
     this.providers.forEach((provider, token) => {
-      // TODO(vojta): move to annotations
-      if (provider.provider.annotations) {
-        for (var annotation of provider.provider.annotations) {
-          if (annotation instanceof annotationClass && !collectedProviders.has(token)) {
-            collectedProviders.set(token, provider);
-          }
-        }
+      if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass)) {
+        collectedProviders.set(token, provider);
       }
     });
 
@@ -183,7 +178,7 @@ class Injector {
             throw new Error(`SuperConstructor does not accept any arguments!${resolvingMsg}`);
           }
 
-          var superArgs = getInjectTokens(superConstructor).map((token) => {
+          var superArgs = readAnnotations(superConstructor).argTokens.map((token) => {
             return injector.get(token, resolving, false);
           });
 

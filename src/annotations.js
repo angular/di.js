@@ -40,57 +40,18 @@ function annotate(fn, annotation) {
 }
 
 
-function getProvideAnnotation(provider) {
-  if (!provider || !provider.annotations || !provider.annotations.length) {
-    return null;
+function hasAnnotation(fn, annotationClass) {
+  if (!fn.annotations || fn.annotations.length === 0) {
+    return false;
   }
 
-
-  var annotations = provider.annotations;
-
-  for (var annotation of annotations) {
-    if (annotation instanceof ProvideAnnotation) {
-      return annotation.id;
+  for (var annotation of fn.annotations) {
+    if (annotation instanceof annotationClass) {
+      return true;
     }
   }
 
-  return null;
-}
-
-function getInjectAnnotation(provider) {
-  if (!provider || !provider.annotations || !provider.annotations.length) {
-    return null;
-  }
-
-  var annotations = provider.annotations;
-  for (var annotation of annotations) {
-    if (annotation instanceof InjectAnnotation) {
-      return annotation.params;
-    }
-  }
-
-  return null;
-}
-
-function getInjectTokens(provider) {
-  // Read the @Inject annotation on the class / function.
-  var params = getInjectAnnotation(provider) || [];
-
-  // Read the annotations on individual parameters.
-  if (provider.parameters) {
-    provider.parameters.forEach((param, idx) => {
-      for (var paramAnnotation of param) {
-        if (isFunction(paramAnnotation) && !params[idx]) {
-          params[idx] = paramAnnotation;
-        } else if (paramAnnotation instanceof Inject) {
-          params[idx] = paramAnnotation.params[0];
-          continue;
-        }
-      }
-    });
-  }
-
-  return params;
+  return false;
 }
 
 
@@ -154,8 +115,6 @@ export {
   ProvideAnnotation,
   ProvidePromise,
   ProvidePromiseAnnotation,
-  getInjectAnnotation,
-  getProvideAnnotation,
-  getInjectTokens,
+  hasAnnotation,
   readAnnotations
 }
