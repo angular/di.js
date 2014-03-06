@@ -1,5 +1,6 @@
 import {Injector} from './injector';
 import {Inject, annotate, readAnnotations} from './annotations';
+import {isUpperCase, isClass} from './util';
 
 var currentSpec = null;
 beforeEach(function() {
@@ -15,18 +16,6 @@ afterEach(function() {
 
 function isRunning() {
   return !!currentSpec;
-}
-
-function isUpperCase(char) {
-  return char.toUpperCase() === char;
-}
-
-function isClass(clsOrFunction) {
-  if (clsOrFunction.name) {
-    return isUpperCase(clsOrFunction.name.charAt(0));
-  }
-
-  return Object.keys(clsOrFunction.prototype).length > 0;
 }
 
 function use(mock) {
