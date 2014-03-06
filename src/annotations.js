@@ -2,28 +2,31 @@ import {isFunction} from './util';
 
 class SuperConstructor {}
 
-// TODO(vojta): provides, id -> token, Inject/ProvidePromise extends and defines isPromise?
 class InjectAnnotation {
   constructor(...tokens) {
     this.tokens = tokens;
+    this.isPromise = false;
   }
 }
 
-class InjectPromiseAnnotation {
+class InjectPromiseAnnotation extends InjectAnnotation {
   constructor(...tokens) {
     this.tokens = tokens;
+    this.isPromise = true;
   }
 }
 
 class ProvideAnnotation {
   constructor(token) {
     this.token = token;
+    this.isPromise = false;
   }
 }
 
-class ProvidePromiseAnnotation {
+class ProvidePromiseAnnotation extends ProvideAnnotation {
   constructor(token) {
     this.token = token;
+    this.isPromise = true;
   }
 }
 
@@ -75,16 +78,12 @@ function readAnnotations(fn) {
     for (var annotation of fn.annotations) {
       if (annotation instanceof InjectAnnotation) {
         collectedAnnotations.injectTokens = annotation.tokens;
+        // TODO(vojta): set injectPromises
       }
 
       if (annotation instanceof ProvideAnnotation) {
         collectedAnnotations.provideToken = annotation.token;
-        collectedAnnotations.isPromise = false;
-      }
-
-      if (annotation instanceof ProvidePromiseAnnotation) {
-        collectedAnnotations.provideToken = annotation.token;
-        collectedAnnotations.isPromise = true;
+        collectedAnnotations.isPromise = annotation.isPromise;
       }
     }
   }
@@ -99,10 +98,7 @@ function readAnnotations(fn) {
           collectedAnnotations.injectPromises[idx] = false;
         } else if (paramAnnotation instanceof InjectAnnotation) {
           collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
-          collectedAnnotations.injectPromises[idx] = false;
-        } else if (paramAnnotation instanceof InjectPromiseAnnotation) {
-          collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
-          collectedAnnotations.injectPromises[idx] = true;
+          collectedAnnotations.injectPromises[idx] = paramAnnotation.isPromise;
         }
       }
     });
