@@ -1,7 +1,7 @@
 // This is the file that gets included when you use "di" module in Node.js.
 
 // Include Traceur runtime.
-require(require('traceur').RUNTIME_PATH);
+require('traceur/bin/traceur-runtime');
 
 // Node.js has to be run with --harmony_collections to support ES6 Map.
 // If not defined, include a polyfill.
