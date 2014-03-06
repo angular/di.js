@@ -46,13 +46,13 @@ class Injector {
     }
 
     var annotations = readAnnotations(provider);
-    var token = annotations.token || key || provider;
+    var token = annotations.provideToken || key || provider;
 
     this.providers.set(token, {
       provider: provider,
       isPromise: annotations.isPromise,
-      params: annotations.argTokens,
-      paramsPromises: annotations.argPromises,
+      params: annotations.injectTokens,
+      paramsPromises: annotations.injectPromises,
       isClass: isClass(provider)
     });
   }
@@ -113,8 +113,8 @@ class Injector {
       provider = {
         provider: defaultProvider,
         isPromise: defaultProviderAnnotations.isPromise,
-        params: defaultProviderAnnotations.argTokens,
-        paramsPromises: defaultProviderAnnotations.argPromises,
+        params: defaultProviderAnnotations.injectTokens,
+        paramsPromises: defaultProviderAnnotations.injectPromises,
         isClass: isClass(defaultProvider)
       };
 
@@ -178,7 +178,7 @@ class Injector {
             throw new Error(`SuperConstructor does not accept any arguments!${resolvingMsg}`);
           }
 
-          var superArgs = readAnnotations(superConstructor).argTokens.map((token) => {
+          var superArgs = readAnnotations(superConstructor).injectTokens.map((token) => {
             return injector.get(token, resolving, false);
           });
 

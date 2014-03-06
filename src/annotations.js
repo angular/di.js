@@ -2,28 +2,28 @@ import {isFunction} from './util';
 
 class SuperConstructor {}
 
-// TODO(vojta): tokens, id -> token, Inject/ProvidePromise extends and defines isPromise?
+// TODO(vojta): provides, id -> token, Inject/ProvidePromise extends and defines isPromise?
 class InjectAnnotation {
-  constructor(...params) {
-    this.params = params;
+  constructor(...tokens) {
+    this.tokens = tokens;
   }
 }
 
 class InjectPromiseAnnotation {
-  constructor(...params) {
-    this.params = params;
+  constructor(...tokens) {
+    this.tokens = tokens;
   }
 }
 
 class ProvideAnnotation {
-  constructor(id) {
-    this.id = id;
+  constructor(token) {
+    this.token = token;
   }
 }
 
 class ProvidePromiseAnnotation {
-  constructor(id) {
-    this.id = id;
+  constructor(token) {
+    this.token = token;
   }
 }
 
@@ -57,25 +57,33 @@ function hasAnnotation(fn, annotationClass) {
 
 function readAnnotations(fn) {
   var collectedAnnotations = {
-    token: null,
+    // A token, what is provided by given function.
+    // Parsed from @Provide or @ProvidePromise
+    provideToken: null,
+    // Boolean.
+    // Does the provider provide the value as a promise?
     isPromise: false,
-    argTokens: [],
-    argPromises: []
+    // List of tokens.
+    // What dependencies does this provide require?
+    injectTokens: [],
+    // List of booleans.
+    // Is given dependency required as a promise?
+    injectPromises: []
   };
 
   if (fn.annotations && fn.annotations.length) {
     for (var annotation of fn.annotations) {
       if (annotation instanceof InjectAnnotation) {
-        collectedAnnotations.argTokens = annotation.params;
+        collectedAnnotations.injectTokens = annotation.tokens;
       }
 
       if (annotation instanceof ProvideAnnotation) {
-        collectedAnnotations.token = annotation.id;
+        collectedAnnotations.provideToken = annotation.token;
         collectedAnnotations.isPromise = false;
       }
 
       if (annotation instanceof ProvidePromiseAnnotation) {
-        collectedAnnotations.token = annotation.id;
+        collectedAnnotations.provideToken = annotation.token;
         collectedAnnotations.isPromise = true;
       }
     }
@@ -86,15 +94,15 @@ function readAnnotations(fn) {
     fn.parameters.forEach((param, idx) => {
       for (var paramAnnotation of param) {
         // Type annotation.
-        if (isFunction(paramAnnotation) && !collectedAnnotations.argTokens[idx]) {
-          collectedAnnotations.argTokens[idx] = paramAnnotation;
-          collectedAnnotations.argPromises[idx] = false;
+        if (isFunction(paramAnnotation) && !collectedAnnotations.injectTokens[idx]) {
+          collectedAnnotations.injectTokens[idx] = paramAnnotation;
+          collectedAnnotations.injectPromises[idx] = false;
         } else if (paramAnnotation instanceof InjectAnnotation) {
-          collectedAnnotations.argTokens[idx] = paramAnnotation.params[0];
-          collectedAnnotations.argPromises[idx] = false;
+          collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
+          collectedAnnotations.injectPromises[idx] = false;
         } else if (paramAnnotation instanceof InjectPromiseAnnotation) {
-          collectedAnnotations.argTokens[idx] = paramAnnotation.params[0];
-          collectedAnnotations.argPromises[idx] = true;
+          collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
+          collectedAnnotations.injectPromises[idx] = true;
         }
       }
     });

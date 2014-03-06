@@ -93,8 +93,8 @@ function inject(...params) {
             providers.set(providerWrapper.as, {
               provider: providerWrapper.provider,
               isPromise: annotations.isPromise,
-              params: annotations.argTokens,
-              paramsPromises: annotations.argPromises,
+              params: annotations.injectTokens,
+              paramsPromises: annotations.injectPromises,
               isClass: isClass(providerWrapper.provider)
             });
           }
