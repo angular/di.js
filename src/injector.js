@@ -7,7 +7,21 @@ import {resolve} from 'q';
 
 var EmptyFunction = Object.getPrototypeOf(Function);
 
+function constructResolvingMessage(resolving, token = null) {
+  if (token) {
+    resolving.push(token);
+  }
+
+  if (resolving.length > 1) {
+    return ` (${resolving.map(toString).join(' -> ')})`;
+  }
+
+  return '';
+}
+
+
 class Injector {
+
   constructor(modules = [], parentInjector = null, providers = new Map()) {
     this.cache = new Map();
     this.providers = providers;
@@ -28,6 +42,7 @@ class Injector {
     }
   }
 
+
   _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
     this.providers.forEach((provider, token) => {
       if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass)) {
@@ -39,6 +54,7 @@ class Injector {
       this.parent._collectProvidersWithAnnotation(annotationClass, collectedProviders);
     }
   }
+
 
   _loadProvider(provider, key) {
     if (!isFunction(provider)) {
@@ -57,6 +73,7 @@ class Injector {
     });
   }
 
+
   _hasProviderFor(token) {
     if (this.providers.has(token)) {
       return true;
@@ -68,6 +85,7 @@ class Injector {
 
     return false;
   }
+
 
   get(token, resolving = [], wantPromise = false) {
     var defaultProvider = null;
@@ -86,17 +104,12 @@ class Injector {
       return this;
     }
 
-
     if (this.cache.has(token)) {
       instance = this.cache.get(token);
 
       if (this.providers.get(token).isPromise) {
         if (!wantPromise) {
-          if (resolving.length > 1) {
-            resolving.push(token);
-            resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
-          }
-
+          resolvingMsg = constructResolvingMessage(resolving, token);
           throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
         }
       } else {
@@ -125,11 +138,7 @@ class Injector {
 
     if (!provider) {
       if (!this.parent) {
-        if (resolving.length) {
-          resolving.push(token);
-          resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
-        }
-
+        resolvingMsg = constructResolvingMessage(resolving, token);
         throw new Error(`No provider for ${toString(token)}!${resolvingMsg}`);
       }
 
@@ -137,10 +146,7 @@ class Injector {
     }
 
     if (resolving.indexOf(token) !== -1) {
-      if (resolving.length) {
-        resolving.push(token);
-        resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
-      }
+      resolvingMsg = constructResolvingMessage(resolving, token);
       throw new Error(`Cannot instantiate cyclic dependency!${resolvingMsg}`);
     }
 
@@ -170,13 +176,13 @@ class Injector {
         var superConstructor = Object.getPrototypeOf(provider.provider);
 
         if (superConstructor === EmptyFunction) {
-          resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+          resolvingMsg = constructResolvingMessage(resolving);
           throw new Error(`Only classes with a parent can ask for SuperConstructor!${resolvingMsg}`);
         }
 
         return function() {
           if (arguments.length > 0) {
-            resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+            resolvingMsg = constructResolvingMessage(resolving);
             throw new Error(`SuperConstructor does not accept any arguments!${resolvingMsg}`);
           }
 
@@ -206,7 +212,7 @@ class Injector {
         try {
           instance = provider.provider.apply(context, args);
         } catch (e) {
-          resolvingMsg = ` (${delayedResolving.map(toString).join(' -> ')})`;
+          resolvingMsg = constructResolvingMessage(resolving);
           var originalMsg = 'ORIGINAL ERROR: ' + e.message;
           e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
           throw e;
@@ -228,11 +234,10 @@ class Injector {
       });
     }
 
-
     try {
       instance = provider.provider.apply(context, args);
     } catch (e) {
-      resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
+      resolvingMsg = constructResolvingMessage(resolving);
       var originalMsg = 'ORIGINAL ERROR: ' + e.message;
       e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
       throw e;
@@ -245,9 +250,7 @@ class Injector {
     this.cache.set(token, instance);
 
     if (!wantPromise && provider.isPromise) {
-      if (resolving.length > 1) {
-        resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
-      }
+      resolvingMsg = constructResolvingMessage(resolving);
 
       throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
     }
@@ -261,13 +264,16 @@ class Injector {
     return instance;
   }
 
+
   getPromise(token) {
     return this.get(token, [], true);
   }
 
+
   invoke(fn, context) {
 
   }
+
 
   createChild(modules = [], forceNewInstancesOf = []) {
     var forcedProviders = new Map();
