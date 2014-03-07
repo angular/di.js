@@ -6,4 +6,4 @@ function getUniqueId() {
 
 export {
   getUniqueId
-}
+};

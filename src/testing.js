@@ -70,7 +70,9 @@ function inject(...params) {
           if (typeof providerWrapper.provider !== 'function') {
             // inlined mock
             providers.set(providerWrapper.as, {
-              provider: function() {return providerWrapper.provider},
+              /*jshint loopfunc:true */
+              provider: function() {return providerWrapper.provider;},
+              /*jshint loopfunc:false */
               isPromise: false,
               params: [],
               paramsPromises: [],
@@ -88,7 +90,7 @@ function inject(...params) {
             });
           }
         }
-      };
+      }
 
       currentSpec.$$injector = new Injector(modules, null, providers);
     }
@@ -101,4 +103,4 @@ function inject(...params) {
 
 export {
   use, inject
-}
+};

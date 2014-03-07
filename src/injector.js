@@ -3,9 +3,9 @@ import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
 // NOTE(vojta): should we rather use custom lightweight promise-like wrapper?
-module Q from 'q';
+import {resolve} from 'q';
 
-var EmptyFunction = Function.__proto__;
+var EmptyFunction = Object.getPrototypeOf(Function);
 
 class Injector {
   constructor(modules = [], parentInjector = null, providers = new Map()) {
@@ -72,6 +72,7 @@ class Injector {
   get(token, resolving = [], wantPromise = false) {
     var defaultProvider = null;
     var resolvingMsg = '';
+    var instance;
 
     if (isFunction(token)) {
       defaultProvider = token;
@@ -79,7 +80,7 @@ class Injector {
 
     if (token === Injector) {
       if (wantPromise) {
-        return Q(this);
+        return resolve(this);
       }
 
       return this;
@@ -87,7 +88,7 @@ class Injector {
 
 
     if (this.cache.has(token)) {
-      var instance = this.cache.get(token);
+      instance = this.cache.get(token);
 
       if (this.providers.get(token).isPromise) {
         if (!wantPromise) {
@@ -100,9 +101,10 @@ class Injector {
         }
       } else {
         if (wantPromise) {
-          return Q(instance);
+          return resolve(instance);
         }
       }
+
       return instance;
     }
 
@@ -144,7 +146,7 @@ class Injector {
 
     resolving.push(token);
 
-    var context = undefined;
+    var context;
 
     if (provider.isClass) {
       context = Object.create(provider.provider.prototype);
@@ -165,7 +167,7 @@ class Injector {
       // TODO(vojta): should be only allowed during the constructor?
       // TODO(vojta): support async arguments for super constructor?
       if (token === SuperConstructor) {
-        var superConstructor = provider.provider.__proto__;
+        var superConstructor = Object.getPrototypeOf(provider.provider);
 
         if (superConstructor === EmptyFunction) {
           resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
@@ -183,7 +185,7 @@ class Injector {
           });
 
           superConstructor.apply(context, superArgs);
-        }
+        };
       }
 
       if (delayingInstantiation) {
@@ -198,14 +200,15 @@ class Injector {
 
       resolving.pop();
 
-      return Q.all(args).then(function(args) {
+      return resolve.all(args).then(function(args) {
         // TODO(vojta): do not repeat yourself ;-)
+        var instance;
         try {
-          var instance = provider.provider.apply(context, args);
+          instance = provider.provider.apply(context, args);
         } catch (e) {
           resolvingMsg = ` (${delayedResolving.map(toString).join(' -> ')})`;
           var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-          e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`
+          e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
           throw e;
         }
 
@@ -227,11 +230,11 @@ class Injector {
 
 
     try {
-      var instance = provider.provider.apply(context, args);
+      instance = provider.provider.apply(context, args);
     } catch (e) {
       resolvingMsg = ` (${resolving.map(toString).join(' -> ')})`;
       var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`
+      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
       throw e;
     }
 
@@ -250,7 +253,7 @@ class Injector {
     }
 
     if (wantPromise && !provider.isPromise) {
-      instance = Q(instance);
+      instance = resolve(instance);
     }
 
     resolving.pop();
@@ -278,20 +281,20 @@ class Injector {
 
 
   dump() {
-    var dump = {
+    var serialized = {
       id: this.id,
       parent_id: this.parent ? this.parent.id : null,
       providers: {}
     };
 
     Object.keys(this.providers).forEach((token) => {
-      dump.providers[token] = {
+      serialized.providers[token] = {
         name: token,
         dependencies: this.providers[token].params
       };
     });
 
-    return dump;
+    return serialized;
   }
 }
 

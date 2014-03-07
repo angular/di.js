@@ -36,4 +36,4 @@ export {
   isFunction,
   isObject,
   toString
-}
+};
