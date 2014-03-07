@@ -17,7 +17,7 @@ require.config({
   baseUrl: '/base',
 
   paths: {
-    'assert': '/base/node_modules/assert/src/assert',
+    'assert': './node_modules/pipe/node_modules/assert/dist/amd/assert',
     'q': './node_modules/q/q'
   },
 

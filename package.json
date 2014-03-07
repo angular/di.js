@@ -17,8 +17,7 @@
     "q": "~1.0.0"
   },
   "devDependencies": {
-    "pipe": "git://github.com/angular/pipe",
-    "assert": "git://github.com/angular/assert",
+    "pipe": "git://github.com/angular/pipe#assert",
     "gulp-connect": "~0.3.0",
     "requirejs": "2.1.10"
   },

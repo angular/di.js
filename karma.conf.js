@@ -14,14 +14,13 @@ module.exports = function(config) {
       {pattern: 'example/testing/*.js', included: false},
       {pattern: 'node_modules/es6-shim/es6-shim.js', included: false},
       {pattern: 'node_modules/q/q.js', included: false},
-      {pattern: 'node_modules/assert/src/**/*.js', included: false}
+      {pattern: 'node_modules/pipe/node_modules/assert/dist/amd/**/*.js', included: false}
     ],
 
     preprocessors: {
       'src/**/*.js': ['traceur'],
       'test/**/*.js': ['traceur'],
-      'example/**/*.js': ['traceur'],
-      'node_modules/assert/**/*.js': ['traceur']
+      'example/**/*.js': ['traceur']
     }
   });
 
