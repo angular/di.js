@@ -20,6 +20,11 @@ function constructResolvingMessage(resolving, token = null) {
 }
 
 
+// TODO(vojta): extract all the super constructor logic into a class provider
+// - add instantiate() method (value only returns, factory invokes, class apply on context)
+// - class provider will flatten all the deps (from parent constructors) first
+// - injector does not care about the concept of super constructor
+// - all deps (including all parent constructor's) are resolved before instantiate()
 class Provider {
   constructor(provider, annotations) {
     this.provider = provider;
