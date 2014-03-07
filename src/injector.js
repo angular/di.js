@@ -20,6 +20,17 @@ function constructResolvingMessage(resolving, token = null) {
 }
 
 
+class Provider {
+  constructor(provider, annotations) {
+    this.provider = provider;
+    this.isClass = isClass(provider);
+    this.isPromise = annotations.isPromise;
+    this.params = annotations.injectTokens;
+    this.paramsPromises = annotations.injectPromises;
+  }
+}
+
+
 class Injector {
 
   constructor(modules = [], parentInjector = null, providers = new Map()) {
@@ -28,18 +39,7 @@ class Injector {
     this.parent = parentInjector;
     this.id = getUniqueId();
 
-    for (var module of modules) {
-      // A single provider.
-      if (isFunction(module)) {
-        this._loadProvider(module);
-        continue;
-      }
-
-      // A module (map of providers).
-      Object.keys(module).forEach((key) => {
-        this._loadProvider(module[key], key);
-      });
-    }
+    this._loadModules(modules);
   }
 
 
@@ -56,6 +56,22 @@ class Injector {
   }
 
 
+  _loadModules(modules) {
+    for (var module of modules) {
+      // A single provider.
+      if (isFunction(module)) {
+        this._loadProvider(module);
+        continue;
+      }
+
+      // A module (map of providers).
+      Object.keys(module).forEach((key) => {
+        this._loadProvider(module[key], key);
+      });
+    }
+  }
+
+
   _loadProvider(provider, key) {
     if (!isFunction(provider)) {
       return;
@@ -64,13 +80,7 @@ class Injector {
     var annotations = readAnnotations(provider);
     var token = annotations.provideToken || key || provider;
 
-    this.providers.set(token, {
-      provider: provider,
-      isPromise: annotations.isPromise,
-      params: annotations.injectTokens,
-      paramsPromises: annotations.injectPromises,
-      isClass: isClass(provider)
-    });
+    this.providers.set(token, new Provider(provider, annotations));
   }
 
 
@@ -88,7 +98,7 @@ class Injector {
 
 
   get(token, resolving = [], wantPromise = false) {
-    var defaultProvider = null;
+    var defaultProvider;
     var resolvingMsg = '';
     var instance;
 
@@ -96,6 +106,7 @@ class Injector {
       defaultProvider = token;
     }
 
+    // Special case, return Injector.
     if (token === Injector) {
       if (wantPromise) {
         return resolve(this);
@@ -104,6 +115,7 @@ class Injector {
       return this;
     }
 
+    // Check if there is a cached instance already.
     if (this.cache.has(token)) {
       instance = this.cache.get(token);
 
@@ -123,16 +135,9 @@ class Injector {
 
     var provider = this.providers.get(token);
 
+    // No provider defined (overriden), use the default provider.
     if (!provider && defaultProvider && !this._hasProviderFor(token)) {
-      var defaultProviderAnnotations = readAnnotations(defaultProvider);
-      provider = {
-        provider: defaultProvider,
-        isPromise: defaultProviderAnnotations.isPromise,
-        params: defaultProviderAnnotations.injectTokens,
-        paramsPromises: defaultProviderAnnotations.injectPromises,
-        isClass: isClass(defaultProvider)
-      };
-
+      provider = new Provider(defaultProvider, readAnnotations(defaultProvider));
       this.providers.set(token, provider);
     }
 
@@ -169,6 +174,7 @@ class Injector {
     var injector = this;
     var delayingInstantiation = wantPromise && provider.params.some((token, i) => !provider.paramsPromises[i]);
 
+
     var args = provider.params.map((token, idx) => {
       // TODO(vojta): should be only allowed during the constructor?
       // TODO(vojta): support async arguments for super constructor?
@@ -201,11 +207,13 @@ class Injector {
       return this.get(token, resolving, provider.paramsPromises[idx]);
     });
 
+    // Delaying the instantiation - return a promise.
     if (delayingInstantiation) {
       var delayedResolving = resolving.slice();
 
       resolving.pop();
 
+      // Once all dependencies (promises) are resolved, instantiate.
       return resolve.all(args).then(function(args) {
         // TODO(vojta): do not repeat yourself ;-)
         var instance;
