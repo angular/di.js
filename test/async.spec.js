@@ -1,7 +1,6 @@
 import {ProvidePromise, InjectPromise, Inject} from '../src/annotations';
 import {Injector} from '../src/injector';
-
-module Q from 'q';
+import {resolve as Q} from 'q';
 
 
 class UserList {}
@@ -33,8 +32,7 @@ describe('async', function() {
     var injector = new Injector([fetchUsers]);
     var p = injector.getPromise(UserList)
 
-    // TODO(vojta): define a matcher
-    expect(Q.isPromise(p)).toBe(true);
+    expect(p).toBePromiseLike();
   });
 
 
@@ -50,8 +48,7 @@ describe('async', function() {
     var injector = new Injector();
     var p = injector.getPromise(SynchronousUserList);
 
-    // TODO(vojta): define a matcher
-    expect(Q.isPromise(p)).toBe(true);
+    expect(p).toBePromiseLike();
   });
 
 
@@ -61,8 +58,7 @@ describe('async', function() {
     var p1 = injector.getPromise(SynchronousUserList);
     var p2 = injector.getPromise(SynchronousUserList);
 
-    // TODO(vojta): define a matcher
-    expect(Q.isPromise(p2)).toBe(true);
+    expect(p2).toBePromiseLike();
   });
 
 
@@ -90,7 +86,6 @@ describe('async', function() {
     var controller = injector.get(SmartUserController);
 
     expect(controller).toBeInstanceOf(SmartUserController);
-    // TODO(vojta): define a matcher
-    expect(Q.isPromise(controller.promise)).toBe(true);
+    expect(controller.promise).toBePromiseLike();
   });
 });

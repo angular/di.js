@@ -18,6 +18,26 @@ beforeEach(function() {
           };
         }
       };
+    },
+
+    toBePromiseLike: function() {
+      return {
+        compare: function(actual, expectedClass) {
+          var pass = typeof actual === 'object' && typeof actual.then === 'function';
+
+          return {
+            pass: pass,
+            get message() {
+              if (pass) {
+                // TODO(vojta): support not.toBePromiseLike
+                throw new Error('not.toBePromiseLike is not supported!');
+              }
+
+              return 'Expected ' + actual + ' to be a promise';
+            }
+          };
+        }
+      };
     }
   });
 });
