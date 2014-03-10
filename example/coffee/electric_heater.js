@@ -7,10 +7,10 @@ export class ElectricHeater {
   constructor() {}
 
   on() {
-    console.log('Turning on electric heater...');
+    // console.log('Turning on electric heater...');
   }
 
   off() {
-    console.log('Turning off electric heater...');
+    // console.log('Turning off electric heater...');
   }
 }

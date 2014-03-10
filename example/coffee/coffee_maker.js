@@ -13,6 +13,6 @@ export class CoffeeMaker {
   brew() {
     this.pump.pump();
     this.heater.on();
-    console.log('Brewing...')
+    // console.log('Brewing...')
   }
 }

@@ -10,6 +10,6 @@ export class Pump {
 
   pump() {
     this.heater.on();
-    console.log('Pumping...');
+    // console.log('Pumping...');
   }
 }
