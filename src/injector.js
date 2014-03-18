@@ -2,8 +2,6 @@ import {SuperConstructor, readAnnotations, hasAnnotation} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
-// NOTE(vojta): should we rather use custom lightweight promise-like wrapper?
-import {resolve} from 'q';
 
 var EmptyFunction = Object.getPrototypeOf(Function);
 
@@ -133,7 +131,7 @@ class Injector {
     // Special case, return Injector.
     if (token === Injector) {
       if (wantPromise) {
-        return resolve(this);
+        return Promise.resolve(this);
       }
 
       return this;
@@ -150,7 +148,7 @@ class Injector {
         }
       } else {
         if (wantPromise) {
-          return resolve(instance);
+          return Promise.resolve(instance);
         }
       }
 
@@ -238,7 +236,7 @@ class Injector {
       resolving.pop();
 
       // Once all dependencies (promises) are resolved, instantiate.
-      return resolve.all(args).then(function(args) {
+      return Promise.all(args).then(function(args) {
         var instance = instantiate(args, context, provider, resolving, token);
 
         injector.cache.set(token, instance);
@@ -264,7 +262,7 @@ class Injector {
     }
 
     if (wantPromise && !provider.isPromise) {
-      instance = resolve(instance);
+      instance = Promise.resolve(instance);
     }
 
     resolving.pop();

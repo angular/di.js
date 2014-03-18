@@ -1,6 +1,5 @@
 import {ProvidePromise, InjectPromise, Inject} from '../src/annotations';
 import {Injector} from '../src/injector';
-import {resolve as Q} from 'q';
 
 
 class UserList {}
@@ -8,7 +7,7 @@ class UserList {}
 // An async provider.
 @ProvidePromise(UserList)
 function fetchUsers() {
-  return Q(new UserList);
+  return Promise.resolve(new UserList);
 }
 
 class SynchronousUserList {}
