@@ -4,6 +4,7 @@ import {getUniqueId} from './profiler';
 
 // NOTE(vojta): should we rather use custom lightweight promise-like wrapper?
 import {resolve} from 'q';
+import Logger from './logger';
 
 var EmptyFunction = Object.getPrototypeOf(Function);
 
@@ -38,11 +39,14 @@ class Provider {
 
 class Injector {
 
-  constructor(modules = [], parentInjector = null, providers = new Map()) {
+  constructor(modules = [], parentInjector = null, providers = new Map(), logger = new Logger()) {
     this.cache = new Map();
     this.providers = providers;
     this.parent = parentInjector;
     this.id = getUniqueId();
+    this.logger = logger;
+
+    this.logger.info(`injector ${this.id} created`);
 
     this._loadModules(modules);
   }
@@ -255,6 +259,7 @@ class Injector {
 
     instance = instantiate(args, context, provider, resolving, token);
 
+    this.logger.info(`${token} created`);
     this.cache.set(token, instance);
 
     if (!wantPromise && provider.isPromise) {
