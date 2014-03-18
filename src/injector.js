@@ -107,9 +107,11 @@ class Injector {
     var resolvingMsg = '';
     var instance;
 
-    function setInstance(args, context, provider, resolving, token) {
+    function instantiate(args, context, provider, resolving, token) {
+      var returnedValue;
+
       try {
-        instance = provider.provider.apply(context, args);
+        returnedValue = provider.provider.apply(context, args);
       } catch (e) {
         resolvingMsg = constructResolvingMessage(resolving);
         var originalMsg = 'ORIGINAL ERROR: ' + e.message;
@@ -117,11 +119,11 @@ class Injector {
         throw e;
       }
 
-      if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
-        instance = context;
+      if (provider.isClass && !isFunction(returnedValue) && !isObject(returnedValue)) {
+        return context;
       }
 
-      return instance;
+      return returnedValue;
     }
 
     if (isFunction(token)) {
@@ -237,7 +239,7 @@ class Injector {
 
       // Once all dependencies (promises) are resolved, instantiate.
       return resolve.all(args).then(function(args) {
-        setInstance(args, context, provider, resolving, token);
+        var instance = instantiate(args, context, provider, resolving, token);
 
         injector.cache.set(token, instance);
 
@@ -251,7 +253,7 @@ class Injector {
       });
     }
 
-    setInstance(args, context, provider, resolving, token);
+    instance = instantiate(args, context, provider, resolving, token);
 
     this.cache.set(token, instance);
 
