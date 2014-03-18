@@ -107,6 +107,23 @@ class Injector {
     var resolvingMsg = '';
     var instance;
 
+    function setInstance(args, context, provider, resolving, token) {
+      try {
+        instance = provider.provider.apply(context, args);
+      } catch (e) {
+        resolvingMsg = constructResolvingMessage(resolving);
+        var originalMsg = 'ORIGINAL ERROR: ' + e.message;
+        e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
+        throw e;
+      }
+
+      if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
+        instance = context;
+      }
+
+      return instance;
+    }
+
     if (isFunction(token)) {
       defaultProvider = token;
     }
@@ -220,20 +237,7 @@ class Injector {
 
       // Once all dependencies (promises) are resolved, instantiate.
       return resolve.all(args).then(function(args) {
-        // TODO(vojta): do not repeat yourself ;-)
-        var instance;
-        try {
-          instance = provider.provider.apply(context, args);
-        } catch (e) {
-          resolvingMsg = constructResolvingMessage(resolving);
-          var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-          e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
-          throw e;
-        }
-
-        if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
-          instance = context;
-        }
+        setInstance(args, context, provider, resolving, token);
 
         injector.cache.set(token, instance);
 
@@ -247,18 +251,7 @@ class Injector {
       });
     }
 
-    try {
-      instance = provider.provider.apply(context, args);
-    } catch (e) {
-      resolvingMsg = constructResolvingMessage(resolving);
-      var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
-      throw e;
-    }
-
-    if (provider.isClass && !isFunction(instance) && !isObject(instance)) {
-      instance = context;
-    }
+    setInstance(args, context, provider, resolving, token);
 
     this.cache.set(token, instance);
 
