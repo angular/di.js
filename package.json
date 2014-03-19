@@ -16,7 +16,7 @@
     "es6-shim": "~0.9.2"
   },
   "devDependencies": {
-    "pipe": "git://github.com/angular/pipe#assert",
+    "pipe": "angular/pipe",
     "gulp-connect": "~0.3.0",
     "gulp-git": "vojtajina/gulp-git#hacked",
     "requirejs": "2.1.10",
