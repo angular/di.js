@@ -88,6 +88,8 @@ gulp.task('release', [], function() {
   .pipe(git.commit('chore(release): <%= incrementedVersion %>'))
   .on('commit_done', function() {
     git.push('upstream', 'master');
-    exec('npm publish --tag v2');
-  })
-})
+    exec('npm publish --tag v2', function() {
+      exec('npm tag di@0.0.1 latest');
+    });
+  });
+});
