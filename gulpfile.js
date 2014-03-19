@@ -6,7 +6,8 @@ var connect = require('gulp-connect');
 var path = {
   src: './src/**/*.js',
   // we have to skip example/node (because of the cyclic symlink)
-  examples: './example/!(node)/**/*.js'
+  examples: './example/!(node)/**/*.js',
+  pkg: './package.json'
 };
 
 
@@ -47,3 +48,46 @@ gulp.task('serve', connect.server({
     browser: 'Google Chrome'
   }
 }));
+
+
+
+
+// This is a super nasty, hacked release task.
+// TODO(vojta): fix gulp-git and clean this up
+var git = require('gulp-git');
+var through = require('through2');
+var exec = require('child_process').exec;
+
+var VERSION_REGEXP = /([\'|\"]?version[\'|\"]?[ ]*:[ ]*[\'|\"]?)([\d||A-a|.|-]*)([\'|\"]?)/i;
+// gulp.task('release', ['build_dist'], function() {
+gulp.task('release', [], function() {
+  var incrementedVersion;
+
+  // increment version
+  gulp.src(path.pkg)
+    .pipe(through.obj(function(file, _, done) {
+      var incrementedVersion;
+      var content = file.contents.toString().replace(VERSION_REGEXP, function(_, prefix, parsedVersion, suffix) {
+        incrementedVersion = parsedVersion.replace(/pre-(\d+)/, function(_, number) {
+          return 'pre-' + (parseInt(number, 10) + 1);
+        });
+
+        return prefix + incrementedVersion + suffix;
+      });
+
+    // TODO(vojta): we should rather create a new file object
+    file.contents = new Buffer(content);
+    file.meta = {
+      incrementedVersion: incrementedVersion
+    };
+
+    this.push(file);
+    done();
+  }))
+  .pipe(gulp.dest('.'))
+  .pipe(git.commit('chore(release): <%= incrementedVersion %>'))
+  .on('commit_done', function() {
+    git.push('upstream', 'master');
+    exec('npm publish --tag v2');
+  })
+})

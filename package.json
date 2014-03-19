@@ -18,7 +18,9 @@
   "devDependencies": {
     "pipe": "git://github.com/angular/pipe#assert",
     "gulp-connect": "~0.3.0",
-    "requirejs": "2.1.10"
+    "gulp-git": "vojtajina/gulp-git#hacked",
+    "requirejs": "2.1.10",
+    "through2": "~0.4.1"
   },
   "scripts": {
     "test": "karma start --single-run"
