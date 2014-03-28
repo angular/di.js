@@ -1,4 +1,4 @@
-import {Inject} from 'di/annotations';
+import {Inject} from 'di';
 
 import {Grinder} from './grinder';
 import {Pump} from './pump';

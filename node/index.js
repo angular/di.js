@@ -9,13 +9,4 @@ if (typeof Map === 'undefined') {
   require('es6-shim');
 }
 
-var annotations = require('../dist/cjs/annotations');
-var injector =  require('../dist/cjs/injector');
-
-// Public API
-module.exports = {
-  Injector: injector.Injector,
-  InjectAnnotation: annotations.Inject,
-  ProvideAnnotation: annotations.Provide,
-  annotate: annotations.annotate
-};
+module.exports = require('../dist/cjs/index');

@@ -1,4 +1,4 @@
-import {Inject} from 'di/annotations';
+import {Inject} from 'di';
 import {Electricity} from './electricity';
 
 @Inject(Electricity)

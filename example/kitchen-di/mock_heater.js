@@ -1,4 +1,4 @@
-import {Provide} from 'di/annotations';
+import {Provide} from 'di';
 import {Heater} from './coffee_maker/heater';
 
 @Provide(Heater)

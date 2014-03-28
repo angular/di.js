@@ -16,8 +16,10 @@
 
       require.config({
         baseUrl: '../../compiled',
-        paths: {
-          'di': '../dist/amd/'
+        map: {
+          '*': {
+            'di': '../dist/amd/index'
+          }
         },
         deps: ['example/kitchen-di/main']
       });
