@@ -59,8 +59,7 @@ var through = require('through2');
 var exec = require('child_process').exec;
 
 var VERSION_REGEXP = /([\'|\"]?version[\'|\"]?[ ]*:[ ]*[\'|\"]?)([\d||A-a|.|-]*)([\'|\"]?)/i;
-// gulp.task('release', ['build_dist'], function() {
-gulp.task('release', [], function() {
+gulp.task('release', ['build_dist'], function() {
   var incrementedVersion;
 
   // increment version
