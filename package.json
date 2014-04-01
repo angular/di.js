@@ -12,13 +12,21 @@
     "url": "https://github.com/angular/di.js/issues"
   },
   "dependencies": {
-    "traceur": "~0.0.30",
+    "traceur": "vojtajina/traceur-compiler#add-es6-pure-transformer-dist",
     "es6-shim": "~0.9.2"
   },
   "devDependencies": {
-    "pipe": "angular/pipe",
-    "gulp-connect": "~0.3.0",
+    "rtts-assert": "angular/assert",
+    "gulp": "^3.5.6",
+    "gulp-connect": "~1.0.5",
+    "gulp-traceur": "vojtajina/gulp-traceur#traceur-as-peer",
     "gulp-git": "vojtajina/gulp-git#hacked",
+    "karma": "^0.12.1",
+    "karma-chrome-launcher": "^0.1.2",
+    "karma-jasmine": "^0.2.2",
+    "karma-requirejs": "^0.2.1",
+    "karma-traceur-preprocessor": "vojtajina/karma-traceur-preprocessor#traceur-as-peer",
+    "pipe": "angular/pipe#remove-transitive-deps",
     "requirejs": "2.1.10",
     "through2": "~0.4.1"
   },

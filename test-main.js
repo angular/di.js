@@ -17,7 +17,7 @@ require.config({
   baseUrl: '/base',
 
   paths: {
-    'assert': './node_modules/pipe/node_modules/assert/dist/amd/assert'
+    'rtts-assert': './node_modules/rtts-assert/src/assert'
   },
 
   // Dynamically load all test files and ES6 polyfill.
