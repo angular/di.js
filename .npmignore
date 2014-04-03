@@ -4,10 +4,9 @@ visualize/
 *.sublime-workspace
 gulpfile.js
 karma.conf.js
-.travis.yml
 /index.html
 test-main.js
-.npmignore
+.*
 *.orig
 Gruntfile.*
 compiled/
