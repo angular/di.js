@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject, Provide, SuperConstructor, InjectLazy} from '../src/annotations';
+import {Inject, Provide, SuperConstructor, InjectLazy, TransientScope} from '../src/annotations';
 
 module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
@@ -276,6 +276,17 @@ describe('injector', function() {
     var injector = new Injector();
 
     expect(injector.get(Injector)).toBe(injector);
+  });
+
+
+  describe('transient', function() {
+    it('should never cache', function() {
+      @TransientScope
+      class Foo {}
+
+      var injector = new Injector();
+      expect(injector.get(Foo)).not.toBe(injector.get(Foo));
+    })
   });
 
 

@@ -1,4 +1,4 @@
-import {SuperConstructor, readAnnotations, hasAnnotation, ProvideAnnotation} from './annotations';
+import {SuperConstructor, readAnnotations, hasAnnotation, ProvideAnnotation, TransientScope} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
@@ -280,7 +280,9 @@ class Injector {
 
     instance = instantiate(args, context, provider, resolving, token);
 
-    this.cache.set(token, instance);
+    if (!hasAnnotation(provider.provider, TransientScope)) {
+      this.cache.set(token, instance);
+    }
 
     if (!wantPromise && provider.isPromise) {
       resolvingMsg = constructResolvingMessage(resolving);

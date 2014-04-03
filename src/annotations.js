@@ -2,6 +2,8 @@ import {isFunction} from './util';
 
 class SuperConstructor {}
 
+class TransientScope {}
+
 class InjectAnnotation {
   constructor(...tokens) {
     this.tokens = tokens;
@@ -126,6 +128,7 @@ function readAnnotations(fn) {
 export {
   annotate,
   SuperConstructor,
+  TransientScope,
   Inject,
   InjectAnnotation,
   InjectPromise,
