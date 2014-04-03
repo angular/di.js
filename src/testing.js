@@ -1,6 +1,6 @@
 import {Injector} from './injector';
 import {Inject, annotate, readAnnotations} from './annotations';
-import {isUpperCase, isClass} from './util';
+import {isUpperCase, isClass, isFunction, isObject} from './util';
 
 var currentSpec = null;
 beforeEach(function() {
@@ -62,13 +62,14 @@ function inject(...params) {
       var modules = [];
       var annotations;
 
-      for (var providerWrapper of currentSpec.$$providers) {
+      currentSpec.$$providers.forEach(function(providerWrapper) {
         if (!providerWrapper.as) {
           // load as a regular module
           modules.push(providerWrapper.provider);
         } else {
-          if (typeof providerWrapper.provider !== 'function') {
+          if (!isFunction(providerWrapper.provider)) {
             // inlined mock
+            // TODO(vojta): use FactoryProvider
             providers.set(providerWrapper.as, {
               /*jshint loopfunc:true */
               provider: function() {return providerWrapper.provider;},
@@ -76,21 +77,39 @@ function inject(...params) {
               isPromise: false,
               params: [],
               paramsPromises: [],
-              isClass: false
+              isClass: false,
+              /*jshint loopfunc:true */
+              create: function() {return providerWrapper.provider;}
+              /*jshint loopfunc:false */
             });
           } else {
             // a fn/class provider with overriden token
+            // TODO(vojta): use Class/FactoryProvider
             annotations = readAnnotations(providerWrapper.provider);
             providers.set(providerWrapper.as, {
               provider: providerWrapper.provider,
               isPromise: annotations.isPromise,
               params: annotations.injectTokens,
               paramsPromises: annotations.injectPromises,
-              isClass: isClass(providerWrapper.provider)
+              isClass: isClass(providerWrapper.provider),
+              create: function(args) {
+                if (isClass(providerWrapper.provider)) {
+                  var context = Object.create(providerWrapper.provider.prototype);
+                  var returnedValue = providerWrapper.provider.apply(context, args);
+
+                  if (!isFunction(returnedValue) && !isObject(returnedValue)) {
+                    return context;
+                  }
+
+                  return returnedValue;
+                } else {
+                  return providerWrapper.provider.apply(undefined, args);
+                }
+              }
             });
           }
         }
-      }
+      });
 
       currentSpec.$$injector = new Injector(modules, null, providers);
     }

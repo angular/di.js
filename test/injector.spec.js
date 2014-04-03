@@ -243,6 +243,44 @@ describe('injector', function() {
   });
 
 
+  it('should support "super" to call multiple parent constructors', function() {
+    class Foo {}
+    class Bar {}
+
+    class Parent {
+      @Inject(Foo)
+      constructor(foo) {
+        this.parentFoo = foo;
+      }
+    }
+
+    @Inject(SuperConstructor, Foo)
+    class Child extends Parent {
+      constructor(superConstructor, foo) {
+        superConstructor();
+        this.childFoo = foo;
+      }
+    }
+
+    @Inject(Bar, SuperConstructor, Foo)
+    class GrandChild extends Child {
+      constructor(bar, superConstructor, foo) {
+        superConstructor();
+        this.grandChildBar = bar;
+        this.grandChildFoo = foo;
+      }
+    }
+
+    var injector = new Injector();
+    var instance = injector.get(GrandChild);
+
+    expect(instance.parentFoo).toBeInstanceOf(Foo);
+    expect(instance.childFoo).toBeInstanceOf(Foo);
+    expect(instance.grandChildFoo).toBeInstanceOf(Foo);
+    expect(instance.grandChildBar).toBeInstanceOf(Bar);
+  });
+
+
   it('should throw an error when used in a factory function', function() {
     class Something {}
 
@@ -252,9 +290,8 @@ describe('injector', function() {
       console.log('init', parent)
     }
 
-    var injector = new Injector([createSomething]);
-
     expect(function() {
+      var injector = new Injector([createSomething]);
       injector.get(Something);
     }).toThrowError(/Only classes with a parent can ask for SuperConstructor!/);
   });
