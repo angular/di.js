@@ -1,4 +1,4 @@
-import {SuperConstructor, readAnnotations, hasAnnotation} from './annotations';
+import {SuperConstructor, readAnnotations, hasAnnotation, ProvideAnnotation} from './annotations';
 import {isUpperCase, isClass, isFunction, isObject, toString} from './util';
 import {getUniqueId} from './profiler';
 
@@ -30,6 +30,7 @@ class Provider {
     this.isPromise = annotations.isPromise;
     this.params = annotations.injectTokens;
     this.paramsPromises = annotations.injectPromises;
+    this.paramsLazily = annotations.injectLazily;
   }
 }
 
@@ -100,10 +101,11 @@ class Injector {
   }
 
 
-  get(token, resolving = [], wantPromise = false) {
+  get(token, resolving = [], wantPromise = false, wantLazy = false) {
     var defaultProvider;
     var resolvingMsg = '';
     var instance;
+    var injector = this;
 
     function instantiate(args, context, provider, resolving, token) {
       var returnedValue;
@@ -135,6 +137,32 @@ class Injector {
       }
 
       return this;
+    }
+
+    // TODO(vojta): optimize - no child injector for locals?
+    if (wantLazy) {
+      return function() {
+        var lazyInjector = injector;
+
+        if (arguments.length) {
+          var locals = [];
+          var args = arguments;
+
+          for (var i = 0; i < args.length; i += 2) {
+            locals.push((function(ii) {
+              var fn = function() {
+                return args[ii + 1];
+              };
+              fn.annotations = [new ProvideAnnotation(args[ii])]
+              return fn;
+            })(i));
+          }
+
+          lazyInjector = injector.createChild(locals);
+        }
+
+        return lazyInjector.get(token, resolving, wantPromise, false);
+      };
     }
 
     // Check if there is a cached instance already.
@@ -193,7 +221,6 @@ class Injector {
     // - requested as promise (delayed)
     // - requested again sync (before the previous gets resolved)
     // -> error, but let it go inside to throw where exactly is the async provider
-    var injector = this;
     var delayingInstantiation = wantPromise && provider.params.some((token, i) => !provider.paramsPromises[i]);
 
 
@@ -223,10 +250,10 @@ class Injector {
       }
 
       if (delayingInstantiation) {
-        return this.get(token, resolving, true);
+        return this.get(token, resolving, true, provider.paramsLazily[idx]);
       }
 
-      return this.get(token, resolving, provider.paramsPromises[idx]);
+      return this.get(token, resolving, provider.paramsPromises[idx], provider.paramsLazily[idx]);
     });
 
     // Delaying the instantiation - return a promise.

@@ -30,11 +30,20 @@ class ProvidePromiseAnnotation extends ProvideAnnotation {
   }
 }
 
+class InjectLazyAnnotation extends InjectAnnotation {
+  constructor(...tokens) {
+    this.tokens = tokens;
+    this.isPromise = false;
+    this.isLazy = true;
+  }
+}
+
 // aliases
 var Inject = InjectAnnotation;
 var InjectPromise = InjectPromiseAnnotation;
 var Provide = ProvideAnnotation;
 var ProvidePromise = ProvidePromiseAnnotation;
+var InjectLazy = InjectLazyAnnotation;
 
 // Helpers for when annotations are not enabled in Traceur.
 function annotate(fn, annotation) {
@@ -71,7 +80,10 @@ function readAnnotations(fn) {
     injectTokens: [],
     // List of booleans.
     // Is given dependency required as a promise?
-    injectPromises: []
+    injectPromises: [],
+    // List of booleans.
+    // Is given dependency required lazily?
+    injectLazily: []
   };
 
   if (fn.annotations && fn.annotations.length) {
@@ -79,6 +91,7 @@ function readAnnotations(fn) {
       if (annotation instanceof InjectAnnotation) {
         collectedAnnotations.injectTokens = annotation.tokens;
         // TODO(vojta): set injectPromises
+        // TODO(vojta): set injectLazily
       }
 
       if (annotation instanceof ProvideAnnotation) {
@@ -96,9 +109,11 @@ function readAnnotations(fn) {
         if (isFunction(paramAnnotation) && !collectedAnnotations.injectTokens[idx]) {
           collectedAnnotations.injectTokens[idx] = paramAnnotation;
           collectedAnnotations.injectPromises[idx] = false;
+          collectedAnnotations.injectLazily[idx] = false;
         } else if (paramAnnotation instanceof InjectAnnotation) {
           collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
           collectedAnnotations.injectPromises[idx] = paramAnnotation.isPromise;
+          collectedAnnotations.injectLazily[idx] = paramAnnotation.isLazy;
         }
       }
     });
@@ -115,6 +130,8 @@ export {
   InjectAnnotation,
   InjectPromise,
   InjectPromiseAnnotation,
+  InjectLazy,
+  InjectLazyAnnotation,
   Provide,
   ProvideAnnotation,
   ProvidePromise,

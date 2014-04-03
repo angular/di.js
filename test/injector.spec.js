@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject, Provide, SuperConstructor} from '../src/annotations';
+import {Inject, Provide, SuperConstructor, InjectLazy} from '../src/annotations';
 
 module carModule from './fixtures/car';
 module houseModule from './fixtures/house';
@@ -423,5 +423,73 @@ describe('injector', function() {
 
       expect(child.get(Injector)).toBe(child);
     });
+  });
+
+
+  describe('lazy', function() {
+
+    it('should instantiate lazily', function() {
+      var constructorSpy = jasmine.createSpy('constructor');
+
+      class ExpensiveEngine {
+        constructor() {
+          constructorSpy();
+        }
+      }
+
+      class Car {
+        constructor(@InjectLazy(ExpensiveEngine) createEngine) {
+          this.engine = null;
+          this.createEngine = createEngine;
+        }
+
+        start() {
+          this.engine = this.createEngine();
+        }
+      }
+
+      var injector = new Injector();
+      var car = injector.get(Car);
+
+      expect(constructorSpy).not.toHaveBeenCalled();
+
+      car.start();
+      expect(constructorSpy).toHaveBeenCalled();
+      expect(car.engine).toBeInstanceOf(ExpensiveEngine);
+    });
+
+
+    describe('with locals', function() {
+      it('should always create a new instance', function() {
+        var constructorSpy = jasmine.createSpy('constructor');
+
+        class ExpensiveEngine {
+          constructor(@Inject('power') power) {
+            constructorSpy();
+            this.power = power;
+          }
+        }
+
+        class Car {
+          constructor(@InjectLazy(ExpensiveEngine) createEngine) {
+            this.createEngine = createEngine;
+          }
+        }
+
+        var injector = new Injector();
+        var car = injector.get(Car);
+
+        var veyronEngine = car.createEngine('power', 1184);
+        var mustangEngine = car.createEngine('power', 420);
+
+        expect(veyronEngine).not.toBe(mustangEngine);
+        expect(veyronEngine.power).toBe(1184);
+        expect(mustangEngine.power).toBe(420);
+
+        var mustangEngine2 = car.createEngine('power', 420);
+        expect(mustangEngine).not.toBe(mustangEngine2);
+      });
+    });
+
   });
 });
