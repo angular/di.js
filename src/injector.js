@@ -373,11 +373,6 @@ class Injector {
   }
 
 
-  invoke(fn, context) {
-
-  }
-
-
   createChild(modules = [], forceNewInstancesOf = []) {
     var forcedProviders = new Map();
 
