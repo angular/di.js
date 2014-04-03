@@ -72,6 +72,15 @@ describe('async', function() {
   });
 
 
+  // regression
+  it('should return a promise even from parent injector', function() {
+    var injector = new Injector([SynchronousUserList]);
+    var childInjector = injector.createChild([])
+
+    expect(childInjector.getPromise(SynchronousUserList)).toBePromiseLike();
+  });
+
+
   it('should throw when a dependency is async', function() {
     var injector = new Injector([fetchUsers]);
 

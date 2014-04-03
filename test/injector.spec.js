@@ -507,6 +507,39 @@ describe('injector', function() {
     });
 
 
+    // regression
+    it('should instantiate lazily from a parent injector', function() {
+      var constructorSpy = jasmine.createSpy('constructor');
+
+      class ExpensiveEngine {
+        constructor() {
+          constructorSpy();
+        }
+      }
+
+      class Car {
+        constructor(@InjectLazy(ExpensiveEngine) createEngine) {
+          this.engine = null;
+          this.createEngine = createEngine;
+        }
+
+        start() {
+          this.engine = this.createEngine();
+        }
+      }
+
+      var injector = new Injector([ExpensiveEngine]);
+      var childInjector = injector.createChild([Car]);
+      var car = childInjector.get(Car);
+
+      expect(constructorSpy).not.toHaveBeenCalled();
+
+      car.start();
+      expect(constructorSpy).toHaveBeenCalled();
+      expect(car.engine).toBeInstanceOf(ExpensiveEngine);
+    });
+
+
     describe('with locals', function() {
       it('should always create a new instance', function() {
         var constructorSpy = jasmine.createSpy('constructor');

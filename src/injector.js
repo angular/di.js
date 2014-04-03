@@ -296,7 +296,7 @@ class Injector {
         throw new Error(`No provider for ${toString(token)}!${resolvingMsg}`);
       }
 
-      return this.parent.get(token, resolving);
+      return this.parent.get(token, resolving, wantPromise, wantLazy);
     }
 
     if (resolving.indexOf(token) !== -1) {
