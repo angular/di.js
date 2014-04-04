@@ -20,6 +20,14 @@ class InjectPromise extends Inject {
   }
 }
 
+class InjectLazy extends Inject {
+  constructor(...tokens) {
+    this.tokens = tokens;
+    this.isPromise = false;
+    this.isLazy = true;
+  }
+}
+
 class Provide {
   constructor(token) {
     this.token = token;
@@ -31,14 +39,6 @@ class ProvidePromise extends Provide {
   constructor(token) {
     this.token = token;
     this.isPromise = true;
-  }
-}
-
-class InjectLazy extends Inject {
-  constructor(...tokens) {
-    this.tokens = tokens;
-    this.isPromise = false;
-    this.isLazy = true;
   }
 }
 
