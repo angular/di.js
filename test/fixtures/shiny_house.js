@@ -1,4 +1,4 @@
-import {annotate, InjectAnnotation} from '../../src/annotations';
+import {annotate, Inject} from '../../src/annotations';
 
 export class ShinyHouse {
   constructor(kitchen) {}
@@ -8,4 +8,4 @@ export class ShinyHouse {
 
 
 // @Inject('Kitchen')
-annotate(ShinyHouse, new InjectAnnotation('Kitchen'));
+annotate(ShinyHouse, new Inject('Kitchen'));

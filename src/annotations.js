@@ -4,35 +4,35 @@ class SuperConstructor {}
 
 class TransientScope {}
 
-class InjectAnnotation {
+class Inject {
   constructor(...tokens) {
     this.tokens = tokens;
     this.isPromise = false;
   }
 }
 
-class InjectPromiseAnnotation extends InjectAnnotation {
+class InjectPromise extends Inject {
   constructor(...tokens) {
     this.tokens = tokens;
     this.isPromise = true;
   }
 }
 
-class ProvideAnnotation {
+class Provide {
   constructor(token) {
     this.token = token;
     this.isPromise = false;
   }
 }
 
-class ProvidePromiseAnnotation extends ProvideAnnotation {
+class ProvidePromise extends Provide {
   constructor(token) {
     this.token = token;
     this.isPromise = true;
   }
 }
 
-class InjectLazyAnnotation extends InjectAnnotation {
+class InjectLazy extends Inject {
   constructor(...tokens) {
     this.tokens = tokens;
     this.isPromise = false;
@@ -40,12 +40,6 @@ class InjectLazyAnnotation extends InjectAnnotation {
   }
 }
 
-// aliases
-var Inject = InjectAnnotation;
-var InjectPromise = InjectPromiseAnnotation;
-var Provide = ProvideAnnotation;
-var ProvidePromise = ProvidePromiseAnnotation;
-var InjectLazy = InjectLazyAnnotation;
 
 // Helpers for when annotations are not enabled in Traceur.
 function annotate(fn, annotation) {
@@ -90,13 +84,13 @@ function readAnnotations(fn) {
 
   if (fn.annotations && fn.annotations.length) {
     for (var annotation of fn.annotations) {
-      if (annotation instanceof InjectAnnotation) {
+      if (annotation instanceof Inject) {
         collectedAnnotations.injectTokens = annotation.tokens;
         // TODO(vojta): set injectPromises
         // TODO(vojta): set injectLazily
       }
 
-      if (annotation instanceof ProvideAnnotation) {
+      if (annotation instanceof Provide) {
         collectedAnnotations.provideToken = annotation.token;
         collectedAnnotations.isPromise = annotation.isPromise;
       }
@@ -112,7 +106,7 @@ function readAnnotations(fn) {
           collectedAnnotations.injectTokens[idx] = paramAnnotation;
           collectedAnnotations.injectPromises[idx] = false;
           collectedAnnotations.injectLazily[idx] = false;
-        } else if (paramAnnotation instanceof InjectAnnotation) {
+        } else if (paramAnnotation instanceof Inject) {
           collectedAnnotations.injectTokens[idx] = paramAnnotation.tokens[0];
           collectedAnnotations.injectPromises[idx] = paramAnnotation.isPromise;
           collectedAnnotations.injectLazily[idx] = paramAnnotation.isLazy;
@@ -127,18 +121,14 @@ function readAnnotations(fn) {
 
 export {
   annotate,
+  hasAnnotation,
+  readAnnotations,
+
   SuperConstructor,
   TransientScope,
   Inject,
-  InjectAnnotation,
   InjectPromise,
-  InjectPromiseAnnotation,
   InjectLazy,
-  InjectLazyAnnotation,
   Provide,
-  ProvideAnnotation,
-  ProvidePromise,
-  ProvidePromiseAnnotation,
-  hasAnnotation,
-  readAnnotations
+  ProvidePromise
 };

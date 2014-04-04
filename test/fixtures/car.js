@@ -1,4 +1,4 @@
-import {annotate, InjectAnnotation, ProvideAnnotation} from '../../src/annotations';
+import {annotate, Inject, Provide} from '../../src/annotations';
 
 export class Car {
   constructor(engine) {
@@ -21,12 +21,12 @@ export class CyclicEngine {
 
 
 // @Inject('Engine')
-annotate(Car, new InjectAnnotation('Engine'));
+annotate(Car, new Inject('Engine'));
 // @Provide()
-annotate(Car, new ProvideAnnotation('Car'));
+annotate(Car, new Provide('Car'));
 
 // @Provide('Engine')
-annotate(createEngine, new ProvideAnnotation('Engine'));
+annotate(createEngine, new Provide('Engine'));
 
 // @Inject('Car')
-annotate(CyclicEngine, new InjectAnnotation('Car'));
+annotate(CyclicEngine, new Inject('Car'));

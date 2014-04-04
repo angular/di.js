@@ -1,4 +1,4 @@
-import {readAnnotations, hasAnnotation, ProvideAnnotation, TransientScope} from './annotations';
+import {readAnnotations, hasAnnotation, Provide as ProvideAnnotation, TransientScope as TransientScopeAnnotation} from './annotations';
 import {isFunction, toString} from './util';
 import {getUniqueId} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
@@ -214,7 +214,7 @@ class Injector {
 
     instance = provider.create(args, resolving, token);
 
-    if (!hasAnnotation(provider.provider, TransientScope)) {
+    if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
       this.cache.set(token, instance);
     }
 
