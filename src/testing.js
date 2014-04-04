@@ -73,7 +73,7 @@ function inject(...params) {
             // inlined mock
             providers.set(providerWrapper.as, createProviderFromFnOrClass(function() {
               return providerWrapper.provider;
-            }, {isPromise: false, injectTokens: [], injectPromises: [], injectLazily: []}));
+            }, {provide: {token: null, isPromise: false}, params: []}));
           } else {
             // a fn/class provider with overriden token
             annotations = readAnnotations(providerWrapper.provider);

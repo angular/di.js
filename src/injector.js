@@ -65,7 +65,7 @@ class Injector {
 
     // TODO(vojta): should we expose provider.token?
     var annotations = readAnnotations(provider);
-    var token = annotations.provideToken || key || provider;
+    var token = annotations.provide.token || key || provider;
     var provider = createProviderFromFnOrClass(provider, annotations);
 
     this.providers.set(token, provider);
@@ -180,14 +180,14 @@ class Injector {
     // - requested as promise (delayed)
     // - requested again sync (before the previous gets resolved)
     // -> error, but let it go inside to throw where exactly is the async provider
-    var delayingInstantiation = wantPromise && provider.params.some((token, i) => !provider.paramsPromises[i]);
-    var args = provider.params.map((token, idx) => {
+    var delayingInstantiation = wantPromise && provider.params.some((param) => !param.isPromise);
+    var args = provider.params.map((param) => {
 
       if (delayingInstantiation) {
-        return this.get(token, resolving, true, provider.paramsLazily[idx]);
+        return this.get(param.token, resolving, true, param.isLazy);
       }
 
-      return this.get(token, resolving, provider.paramsPromises[idx], provider.paramsLazily[idx]);
+      return this.get(param.token, resolving, param.isPromise, param.isLazy);
     });
 
     // Delaying the instantiation - return a promise.

@@ -1,4 +1,12 @@
-import {hasAnnotation, readAnnotations} from '../src/annotations';
+import {
+  hasAnnotation,
+  readAnnotations,
+  Inject,
+  InjectLazy,
+  InjectPromise,
+  Provide,
+  ProvidePromise
+} from '../src/annotations';
 
 
 describe('hasAnnotation', function() {
@@ -37,4 +45,117 @@ describe('hasAnnotation', function() {
 
 describe('readAnnotations', function() {
 
+  it('should read @Provide', function() {
+    class Bar {}
+
+    @Provide(Bar)
+    class Foo {}
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.provide.token).toBe(Bar);
+    expect(annotations.provide.isPromise).toBe(false);
+  });
+
+
+  it('should read @ProvidePromise', function() {
+    class Bar {}
+
+    @ProvidePromise(Bar)
+    class Foo {}
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.provide.token).toBe(Bar);
+    expect(annotations.provide.isPromise).toBe(true);
+  });
+
+
+  it('should read @Inject', function() {
+    class One {}
+    class Two {}
+
+    @Inject(One, Two)
+    class Foo {}
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(false);
+    expect(annotations.params[0].isLazy).toBe(false);
+
+    expect(annotations.params[1].token).toBe(Two);
+    expect(annotations.params[1].isPromise).toBe(false);
+    expect(annotations.params[1].isLazy).toBe(false);
+  });
+
+
+  it('should read @Inject on a parameter', function() {
+    class One {}
+    class Two {}
+
+    class Foo {
+      constructor(@Inject(One) one, @Inject(Two) two) {}
+    }
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(false);
+    expect(annotations.params[0].isLazy).toBe(false);
+
+    expect(annotations.params[1].token).toBe(Two);
+    expect(annotations.params[1].isPromise).toBe(false);
+    expect(annotations.params[1].isLazy).toBe(false);
+  });
+
+
+  it('should read @InjectLazy on a parameter', function() {
+    class One {}
+
+    class Foo {
+      constructor(@InjectLazy(One) one) {}
+    }
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(false);
+    expect(annotations.params[0].isLazy).toBe(true);
+  });
+
+
+  it('should read @InjectPromise on a parameter', function() {
+    class One {}
+
+    class Foo {
+      constructor(@InjectPromise(One) one) {}
+    }
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(true);
+    expect(annotations.params[0].isLazy).toBe(false);
+  });
+
+
+  it('should read type annotations', function() {
+    class One {}
+    class Two {}
+
+    class Foo {
+      constructor(one: One, two: Two) {}
+    }
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(false);
+    expect(annotations.params[0].isLazy).toBe(false);
+
+    expect(annotations.params[1].token).toBe(Two);
+    expect(annotations.params[1].isPromise).toBe(false);
+    expect(annotations.params[1].isLazy).toBe(false);
+  });
 });

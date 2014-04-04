@@ -25,13 +25,9 @@ class ClassProvider {
   constructor(provider, annotations) {
     // TODO(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
     this.provider = provider;
-    this.isPromise = annotations.isPromise;
+    this.isPromise = annotations.provide.isPromise;
 
-    // TODO(vojta): make params list of objects (isPromise, isLazy, token) -> same as provide definition
     this.params = [];
-    this.paramsPromises = [];
-    this.paramsLazily = [];
-
     this.superConstructorPositions = [];
 
     this._flattenParams(provider, annotations);
@@ -43,10 +39,8 @@ class ClassProvider {
     var superConstructor;
     var superConstructorFrame;
 
-    for (var i = 0; i < annotations.injectTokens.length; i++) {
-      token = annotations.injectTokens[i];
-
-      if (token === SuperConstructor) {
+    for (var param of annotations.params) {
+      if (param.token === SuperConstructor) {
         superConstructor = Object.getPrototypeOf(provider);
 
         if (superConstructor === EmptyFunction) {
@@ -62,9 +56,7 @@ class ClassProvider {
         this._flattenParams(superConstructor, readAnnotations(superConstructor));
         superConstructorFrame.push(this.params.length - 1);
       } else {
-        this.params.push(token);
-        this.paramsLazily.push(annotations.injectLazily[i]);
-        this.paramsPromises.push(annotations.injectPromises[i]);
+        this.params.push(param);
       }
     }
   }
@@ -115,15 +107,11 @@ class ClassProvider {
 class FactoryProvider {
   constructor(provider, annotations) {
     this.provider = provider;
-    this.isPromise = annotations.isPromise;
+    this.isPromise = annotations.provide.isPromise;
+    this.params = annotations.params;
 
-    // TODO(vojta): make this an array of objects
-    this.params = annotations.injectTokens;
-    this.paramsPromises = annotations.injectPromises;
-    this.paramsLazily = annotations.injectLazily;
-
-    for (var token of annotations.injectTokens) {
-      if (token === SuperConstructor) {
+    for (var param of this.params) {
+      if (param.token === SuperConstructor) {
         throw new Error('Only classes with a parent can ask for SuperConstructor!');
       }
     }
