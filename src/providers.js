@@ -2,6 +2,19 @@ import {SuperConstructor, readAnnotations} from './annotations';
 import {isClass, isFunction, isObject, toString} from './util';
 
 
+// Provider is responsible for creating instances.
+//
+// responsibilities:
+// - create instances
+//
+// communication:
+// - exposes `create()` which creates an instance of something
+// - exposes `params` (information about which arguments it requires to be passed into `create()`)
+//
+// Injector reads `provider.params` first, create these dependencies (however it wants),
+// then calls `provider.create(args)`, passing in these arguments.
+
+
 // TODO(vojta): duplicate from injector.js, remove
 function constructResolvingMessage(resolving, token = null) {
   if (token) {
@@ -19,9 +32,17 @@ function constructResolvingMessage(resolving, token = null) {
 var EmptyFunction = Object.getPrototypeOf(Function);
 
 
+// ClassProvider knows how to instantiate classes.
+//
+// If a class inherits (has parent constructors), this provider normalizes all the dependencies
+// into a single flat array first, so that the injector does not need to worry about inheritance.
+//
+// - all the state is immutable (constructed)
+//
 // TODO(vojta): super constructor - should be only allowed during the constructor call?
 // TODO(vojta): support async arguments for super constructor?
 class ClassProvider {
+  // TODO(vojta): should only need a class, remove `annotations`
   constructor(provider, annotations) {
     // TODO(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
     this.provider = provider;
@@ -34,6 +55,13 @@ class ClassProvider {
     this.superConstructorPositions.unshift([provider, 0, this.params.length - 1]);
   }
 
+  // Normalize params for all the constructors (in the case of inheritance),
+  // into a single flat array of DependencyDesriptors.
+  // So that the injector does not have to worry about inheritance.
+  //
+  // This function mutates `this.params` and `this.superConstructorPositions`,
+  // but it is only called during the constructor.
+  // TODO(vojta): remove the annotations argument?
   _flattenParams(provider, annotations) {
     var token;
     var superConstructor;
@@ -61,6 +89,9 @@ class ClassProvider {
     }
   }
 
+  // Basically the reverse process to `this._flattenParams`:
+  // We get arguments for all the constructors as a single flat array.
+  // This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
   _createConstructor(currentSuperConstructorFrameIdx, context, allArguments) {
     var superConstructorFrame = this.superConstructorPositions[currentSuperConstructorFrameIdx];
     var nextSuperConstructorFrame = this.superConstructorPositions[currentSuperConstructorFrameIdx + 1];
@@ -80,6 +111,7 @@ class ClassProvider {
     }
   }
 
+  // It is called by injector to create an instance.
   // TODO(vojta): refactor resolving, token (it's just for the error message)
   create(args, resolving, token) {
     var context = Object.create(this.provider.prototype);
@@ -104,7 +136,10 @@ class ClassProvider {
 }
 
 
+// FactoryProvider knows how to create instance from a factory function.
+// - all the state is immutable
 class FactoryProvider {
+  // TODO(vojta): should only accept factory function, not `annotations`
   constructor(provider, annotations) {
     this.provider = provider;
     this.isPromise = annotations.provide.isPromise;

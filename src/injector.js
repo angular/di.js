@@ -17,6 +17,18 @@ function constructResolvingMessage(resolving, token = null) {
 }
 
 
+// Injector encapsulate a life scope.
+// There is exactly one instance for given token in given injector.
+//
+// All the state is immutable, the only state changes is the cache. There is however no way to produce different instance under given token. In that sense it is immutable.
+//
+// Injector is responsible for:
+// - resolving tokens into
+//   - provider
+//   - value (cache/calling provider)
+// - dealing with isPromise
+// - dealing with isLazy
+// - loading different "providers" and modules
 class Injector {
 
   constructor(modules = [], parentInjector = null, providers = new Map()) {
@@ -29,6 +41,8 @@ class Injector {
   }
 
 
+  // Collect all registered providers that has given annotation.
+  // Inclugind providers defined in parent injectors.
   _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
     this.providers.forEach((provider, token) => {
       if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass)) {
@@ -42,6 +56,8 @@ class Injector {
   }
 
 
+  // Load modules/function/classes.
+  // This mutates `this.providers`, but it is only called during the constructor.
   _loadModules(modules) {
     for (var module of modules) {
       // A single provider.
@@ -58,6 +74,8 @@ class Injector {
   }
 
 
+  // Load a function or class.
+  // This mutates `this.providers`, but it is only called during the constructor.
   _loadProvider(provider, key) {
     if (!isFunction(provider)) {
       return;
@@ -72,6 +90,8 @@ class Injector {
   }
 
 
+  // Returns true if there is any provider registered for given token.
+  // Inclugind parent injectors.
   _hasProviderFor(token) {
     if (this.providers.has(token)) {
       return true;
@@ -85,6 +105,7 @@ class Injector {
   }
 
 
+  // Return an instance for given token.
   get(token, resolving = [], wantPromise = false, wantLazy = false) {
     var defaultProvider;
     var resolvingMsg = '';
@@ -192,7 +213,7 @@ class Injector {
 
     // Delaying the instantiation - return a promise.
     if (delayingInstantiation) {
-      var delayedResolving = resolving.slice();
+      var delayedResolving = resolving.slice(); // clone
 
       resolving.pop();
 
@@ -239,6 +260,8 @@ class Injector {
   }
 
 
+  // Create a child injector, which encapsulate shorter life scope.
+  // It is possible to add additional providers and also force new instances of existing providers.
   createChild(modules = [], forceNewInstancesOf = []) {
     var forcedProviders = new Map();
 
