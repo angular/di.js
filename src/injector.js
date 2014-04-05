@@ -107,16 +107,11 @@ class Injector {
 
   // Return an instance for given token.
   get(token, resolving = [], wantPromise = false, wantLazy = false) {
-    var defaultProvider;
     var resolvingMsg = '';
     var instance;
     var injector = this;
 
-    if (isFunction(token)) {
-      defaultProvider = token;
-    }
-
-    // Special case, return Injector.
+    // Special case, return itself.
     if (token === Injector) {
       if (wantPromise) {
         return Promise.resolve(this);
@@ -171,9 +166,9 @@ class Injector {
 
     var provider = this.providers.get(token);
 
-    // No provider defined (overriden), use the default provider.
-    if (!provider && defaultProvider && !this._hasProviderFor(token)) {
-      provider = createProviderFromFnOrClass(defaultProvider, readAnnotations(defaultProvider));
+    // No provider defined (overriden), use the default provider (token).
+    if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
+      provider = createProviderFromFnOrClass(token, readAnnotations(token));
       this.providers.set(token, provider);
     }
 
