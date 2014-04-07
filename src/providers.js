@@ -40,7 +40,6 @@ var EmptyFunction = Object.getPrototypeOf(Function);
 // - all the state is immutable (constructed)
 //
 // TODO(vojta): super constructor - should be only allowed during the constructor call?
-// TODO(vojta): support async arguments for super constructor?
 class ClassProvider {
   // TODO(vojta): should only need a class, remove `annotations`
   constructor(provider, annotations) {

@@ -117,4 +117,17 @@ describe('async', function() {
       });
     });
   });
+
+
+  it('should allow aync dependency in a parent constructor', function(done) {
+    class ChildUserController extends UserController {}
+
+    var injector = new Injector([fetchUsers]);
+
+    injector.getPromise(ChildUserController).then(function(childUserController) {
+      expect(childUserController).toBeInstanceOf(ChildUserController);
+      expect(childUserController.list).toBeInstanceOf(UserList);
+      done();
+    });
+  });
 });
