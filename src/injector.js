@@ -1,4 +1,10 @@
-import {readAnnotations, hasAnnotation, Provide as ProvideAnnotation, TransientScope as TransientScopeAnnotation} from './annotations';
+import {
+  annotate,
+  readAnnotations,
+  hasAnnotation,
+  Provide as ProvideAnnotation,
+  TransientScope as TransientScopeAnnotation
+} from './annotations';
 import {isFunction, toString} from './util';
 import {getUniqueId} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
@@ -134,7 +140,9 @@ class Injector {
               var fn = function createLocalInstance() {
                 return args[ii + 1];
               };
-              fn.annotations = [new ProvideAnnotation(args[ii])]
+
+              annotate(fn, new ProvideAnnotation(args[ii]));
+
               return fn;
             })(i));
           }
