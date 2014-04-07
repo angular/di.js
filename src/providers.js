@@ -41,17 +41,16 @@ var EmptyFunction = Object.getPrototypeOf(Function);
 //
 // TODO(vojta): super constructor - should be only allowed during the constructor call?
 class ClassProvider {
-  // TODO(vojta): should only need a class, remove `annotations`
-  constructor(provider, annotations) {
+  constructor(clazz, params, isPromise) {
     // TODO(vojta): can we hide this.provider? (only used for hasAnnotation(provider.provider))
-    this.provider = provider;
-    this.isPromise = annotations.provide.isPromise;
+    this.provider = clazz;
+    this.isPromise = isPromise;
 
     this.params = [];
     this.constructors = [];
 
-    this._flattenParams(provider, annotations);
-    this.constructors.unshift([provider, 0, this.params.length - 1]);
+    this._flattenParams(clazz, params);
+    this.constructors.unshift([clazz, 0, this.params.length - 1]);
   }
 
   // Normalize params for all the constructors (in the case of inheritance),
@@ -61,14 +60,14 @@ class ClassProvider {
   // This function mutates `this.params` and `this.constructors`,
   // but it is only called during the constructor.
   // TODO(vojta): remove the annotations argument?
-  _flattenParams(provider, annotations) {
+  _flattenParams(constructor, params) {
     var token;
     var SuperConstructor;
     var constructorInfo;
 
-    for (var param of annotations.params) {
+    for (var param of params) {
       if (param.token === SuperConstructorAnnotation) {
-        SuperConstructor = Object.getPrototypeOf(provider);
+        SuperConstructor = Object.getPrototypeOf(constructor);
 
         if (SuperConstructor === EmptyFunction) {
           // TODO(vojta): fix this, we are not resolving yet, when should we throw?
@@ -80,7 +79,7 @@ class ClassProvider {
 
         constructorInfo = [SuperConstructor, this.params.length];
         this.constructors.push(constructorInfo);
-        this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor));
+        this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor).params);
         constructorInfo.push(this.params.length - 1);
       } else {
         this.params.push(param);
@@ -97,9 +96,10 @@ class ClassProvider {
     var argsForCurrentConstructor;
 
     if (nextConstructorInfo) {
-      argsForCurrentConstructor = allArguments.slice(constructorInfo[1], nextConstructorInfo[1])
-                             .concat([this._createConstructor(currentConstructorIdx + 1, context, allArguments)])
-                             .concat(allArguments.slice(nextConstructorInfo[2] + 1, constructorInfo[2] + 1));
+      argsForCurrentConstructor = allArguments
+          .slice(constructorInfo[1], nextConstructorInfo[1])
+          .concat([this._createConstructor(currentConstructorIdx + 1, context, allArguments)])
+          .concat(allArguments.slice(nextConstructorInfo[2] + 1, constructorInfo[2] + 1));
     } else {
       argsForCurrentConstructor = allArguments.slice(constructorInfo[1], constructorInfo[2] + 1);
     }
@@ -138,13 +138,12 @@ class ClassProvider {
 // FactoryProvider knows how to create instance from a factory function.
 // - all the state is immutable
 class FactoryProvider {
-  // TODO(vojta): should only accept factory function, not `annotations`
-  constructor(provider, annotations) {
-    this.provider = provider;
-    this.isPromise = annotations.provide.isPromise;
-    this.params = annotations.params;
+  constructor(factoryFunction, params, isPromise) {
+    this.provider = factoryFunction;
+    this.params = params;
+    this.isPromise = isPromise;
 
-    for (var param of this.params) {
+    for (var param of params) {
       if (param.token === SuperConstructorAnnotation) {
         throw new Error('Only classes with a parent can ask for SuperConstructor!');
       }
@@ -167,8 +166,8 @@ class FactoryProvider {
 
 export function createProviderFromFnOrClass(fnOrClass, annotations) {
   if (isClass(fnOrClass)) {
-    return new ClassProvider(fnOrClass, annotations);
+    return new ClassProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
   }
 
-  return new FactoryProvider(fnOrClass, annotations);
+  return new FactoryProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
 }
