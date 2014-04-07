@@ -68,13 +68,15 @@ class Injector {
     for (var module of modules) {
       // A single provider.
       if (isFunction(module)) {
-        this._loadProvider(module);
+        this._loadFnOrClass(module);
         continue;
       }
 
       // A module (map of providers).
       Object.keys(module).forEach((key) => {
-        this._loadProvider(module[key], key);
+        if (isFunction(module[key])) {
+          this._loadFnOrClass(module[key], key);
+        }
       });
     }
   }
@@ -82,15 +84,11 @@ class Injector {
 
   // Load a function or class.
   // This mutates `this.providers`, but it is only called during the constructor.
-  _loadProvider(provider, key) {
-    if (!isFunction(provider)) {
-      return;
-    }
-
+  _loadFnOrClass(fnOrClass, key) {
     // TODO(vojta): should we expose provider.token?
-    var annotations = readAnnotations(provider);
-    var token = annotations.provide.token || key || provider;
-    var provider = createProviderFromFnOrClass(provider, annotations);
+    var annotations = readAnnotations(fnOrClass);
+    var token = annotations.provide.token || key || fnOrClass;
+    var provider = createProviderFromFnOrClass(fnOrClass, annotations);
 
     this.providers.set(token, provider);
   }

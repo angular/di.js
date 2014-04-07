@@ -1,4 +1,4 @@
-import {SuperConstructor, readAnnotations} from './annotations';
+import {SuperConstructor as SuperConstructorAnnotation, readAnnotations} from './annotations';
 import {isClass, isFunction, isObject, toString} from './util';
 
 
@@ -49,29 +49,29 @@ class ClassProvider {
     this.isPromise = annotations.provide.isPromise;
 
     this.params = [];
-    this.superConstructorPositions = [];
+    this.constructors = [];
 
     this._flattenParams(provider, annotations);
-    this.superConstructorPositions.unshift([provider, 0, this.params.length - 1]);
+    this.constructors.unshift([provider, 0, this.params.length - 1]);
   }
 
   // Normalize params for all the constructors (in the case of inheritance),
   // into a single flat array of DependencyDesriptors.
   // So that the injector does not have to worry about inheritance.
   //
-  // This function mutates `this.params` and `this.superConstructorPositions`,
+  // This function mutates `this.params` and `this.constructors`,
   // but it is only called during the constructor.
   // TODO(vojta): remove the annotations argument?
   _flattenParams(provider, annotations) {
     var token;
-    var superConstructor;
-    var superConstructorFrame;
+    var SuperConstructor;
+    var constructorInfo;
 
     for (var param of annotations.params) {
-      if (param.token === SuperConstructor) {
-        superConstructor = Object.getPrototypeOf(provider);
+      if (param.token === SuperConstructorAnnotation) {
+        SuperConstructor = Object.getPrototypeOf(provider);
 
-        if (superConstructor === EmptyFunction) {
+        if (SuperConstructor === EmptyFunction) {
           // TODO(vojta): fix this, we are not resolving yet, when should we throw?
           // Probably as early as possible.
           var resolving = [];
@@ -79,10 +79,10 @@ class ClassProvider {
           throw new Error(`Only classes with a parent can ask for SuperConstructor!${resolvingMsg}`);
         }
 
-        superConstructorFrame = [superConstructor, this.params.length];
-        this.superConstructorPositions.push(superConstructorFrame);
-        this._flattenParams(superConstructor, readAnnotations(superConstructor));
-        superConstructorFrame.push(this.params.length - 1);
+        constructorInfo = [SuperConstructor, this.params.length];
+        this.constructors.push(constructorInfo);
+        this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor));
+        constructorInfo.push(this.params.length - 1);
       } else {
         this.params.push(param);
       }
@@ -92,22 +92,22 @@ class ClassProvider {
   // Basically the reverse process to `this._flattenParams`:
   // We get arguments for all the constructors as a single flat array.
   // This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
-  _createConstructor(currentSuperConstructorFrameIdx, context, allArguments) {
-    var superConstructorFrame = this.superConstructorPositions[currentSuperConstructorFrameIdx];
-    var nextSuperConstructorFrame = this.superConstructorPositions[currentSuperConstructorFrameIdx + 1];
-    var denormalizedArgs;
+  _createConstructor(currentConstructorIdx, context, allArguments) {
+    var constructorInfo = this.constructors[currentConstructorIdx];
+    var nextConstructorInfo = this.constructors[currentConstructorIdx + 1];
+    var argsForCurrentConstructor;
 
-    if (nextSuperConstructorFrame) {
-      denormalizedArgs = allArguments.slice(superConstructorFrame[1], nextSuperConstructorFrame[1])
-                             .concat([this._createConstructor(currentSuperConstructorFrameIdx + 1, context, allArguments)])
-                             .concat(allArguments.slice(nextSuperConstructorFrame[2] + 1, superConstructorFrame[2] + 1));
+    if (nextConstructorInfo) {
+      argsForCurrentConstructor = allArguments.slice(constructorInfo[1], nextConstructorInfo[1])
+                             .concat([this._createConstructor(currentConstructorIdx + 1, context, allArguments)])
+                             .concat(allArguments.slice(nextConstructorInfo[2] + 1, constructorInfo[2] + 1));
     } else {
-      denormalizedArgs = allArguments.slice(superConstructorFrame[1], superConstructorFrame[2] + 1);
+      argsForCurrentConstructor = allArguments.slice(constructorInfo[1], constructorInfo[2] + 1);
     }
 
     return function InjectedAndBoundSuperConstructor() {
       // TODO(vojta): throw if arguments given
-      return superConstructorFrame[0].apply(context, denormalizedArgs);
+      return constructorInfo[0].apply(context, argsForCurrentConstructor);
     }
   }
 
@@ -127,11 +127,11 @@ class ClassProvider {
       throw e;
     }
 
-    if (!isFunction(returnedValue) && !isObject(returnedValue)) {
-      return context;
+    if (isFunction(returnedValue) || isObject(returnedValue)) {
+      return returnedValue;
     }
 
-    return returnedValue;
+    return context;
   }
 }
 
@@ -146,7 +146,7 @@ class FactoryProvider {
     this.params = annotations.params;
 
     for (var param of this.params) {
-      if (param.token === SuperConstructor) {
+      if (param.token === SuperConstructorAnnotation) {
         throw new Error('Only classes with a parent can ask for SuperConstructor!');
       }
     }
