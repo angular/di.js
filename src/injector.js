@@ -122,7 +122,7 @@ class Injector {
 
     // TODO(vojta): optimize - no child injector for locals?
     if (wantLazy) {
-      return function() {
+      return function createLazyInstance() {
         var lazyInjector = injector;
 
         if (arguments.length) {
@@ -131,7 +131,7 @@ class Injector {
 
           for (var i = 0; i < args.length; i += 2) {
             locals.push((function(ii) {
-              var fn = function() {
+              var fn = function createLocalInstance() {
                 return args[ii + 1];
               };
               fn.annotations = [new ProvideAnnotation(args[ii])]
