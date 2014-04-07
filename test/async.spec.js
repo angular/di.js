@@ -1,4 +1,4 @@
-import {ProvidePromise, InjectPromise, Inject} from '../src/annotations';
+import {ProvidePromise, InjectPromise, Inject, TransientScope} from '../src/annotations';
 import {Injector} from '../src/injector';
 
 
@@ -95,5 +95,26 @@ describe('async', function() {
 
     expect(controller).toBeInstanceOf(SmartUserController);
     expect(controller.promise).toBePromiseLike();
+  });
+
+
+  // regression
+  it('should not cache TransientScope', function(done) {
+    @TransientScope
+    @Inject(UserList)
+    class NeverCachedUserController {
+      constructor(list) {
+        this.list = list;
+      }
+    }
+
+    var injector = new Injector([fetchUsers]);
+
+    injector.getPromise(NeverCachedUserController).then(function(controller1) {
+      injector.getPromise(NeverCachedUserController).then(function(controller2) {
+        expect(controller1).not.toBe(controller2);
+        done();
+      });
+    });
   });
 });

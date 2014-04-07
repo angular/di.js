@@ -222,7 +222,9 @@ class Injector {
       return Promise.all(args).then(function(args) {
         var instance = provider.create(args, resolving, token);
 
-        injector.cache.set(token, instance);
+        if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
+          injector.cache.set(token, instance);
+        }
 
         // TODO(vojta): if a provider returns a promise (but is not declared as @ProvidePromise),
         // here the value will get unwrapped (because it is returned from a promise callback) and
