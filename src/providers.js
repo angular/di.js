@@ -110,20 +110,10 @@ class ClassProvider {
   }
 
   // It is called by injector to create an instance.
-  // TODO(vojta): refactor resolving, token (it's just for the error message)
-  create(args, resolving, token) {
+  create(args) {
     var context = Object.create(this.provider.prototype);
     var constructor = this._createConstructor(0, context, args);
-    var returnedValue;
-
-    try {
-      returnedValue = constructor();
-    } catch (e) {
-      var resolvingMsg = constructResolvingMessage(resolving);
-      var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
-      throw e;
-    }
+    var returnedValue = constructor();
 
     if (isFunction(returnedValue) || isObject(returnedValue)) {
       return returnedValue;
@@ -149,16 +139,8 @@ class FactoryProvider {
     }
   }
 
-  create(args, resolving, token) {
-    // TODO(vojta): should we move the try/catch to injector
-    try {
-      return this.provider.apply(undefined, args);
-    } catch (e) {
-      var resolvingMsg = constructResolvingMessage(resolving);
-      var originalMsg = 'ORIGINAL ERROR: ' + e.message;
-      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
-      throw e;
-    }
+  create(args) {
+    return this.provider.apply(undefined, args);
   }
 }
 

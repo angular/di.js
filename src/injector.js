@@ -220,7 +220,14 @@ class Injector {
 
       // Once all dependencies (promises) are resolved, instantiate.
       return Promise.all(args).then(function(args) {
-        var instance = provider.create(args, resolving, token);
+        try {
+          instance = provider.create(args);
+        } catch (e) {
+          resolvingMsg = constructResolvingMessage(delayedResolving);
+          var originalMsg = 'ORIGINAL ERROR: ' + e.message;
+          e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
+          throw e;
+        }
 
         if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
           injector.cache.set(token, instance);
@@ -235,7 +242,14 @@ class Injector {
       });
     }
 
-    instance = provider.create(args, resolving, token);
+    try {
+      instance = provider.create(args);
+    } catch (e) {
+      resolvingMsg = constructResolvingMessage(resolving);
+      var originalMsg = 'ORIGINAL ERROR: ' + e.message;
+      e.message = `Error during instantiation of ${toString(token)}!${resolvingMsg}\n${originalMsg}`;
+      throw e;
+    }
 
     if (!hasAnnotation(provider.provider, TransientScopeAnnotation)) {
       this.cache.set(token, instance);
