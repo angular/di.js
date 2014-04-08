@@ -15,20 +15,6 @@ import {isClass, isFunction, isObject, toString} from './util';
 // then calls `provider.create(args)`, passing in these arguments.
 
 
-// TODO(vojta): duplicate from injector.js, remove
-function constructResolvingMessage(resolving, token = null) {
-  if (token) {
-    resolving.push(token);
-  }
-
-  if (resolving.length > 1) {
-    return ` (${resolving.map(toString).join(' -> ')})`;
-  }
-
-  return '';
-}
-
-
 var EmptyFunction = Object.getPrototypeOf(Function);
 
 
@@ -69,11 +55,7 @@ class ClassProvider {
         SuperConstructor = Object.getPrototypeOf(constructor);
 
         if (SuperConstructor === EmptyFunction) {
-          // TODO(vojta): fix this, we are not resolving yet, when should we throw?
-          // Probably as early as possible.
-          var resolving = [];
-          var resolvingMsg = constructResolvingMessage(resolving);
-          throw new Error(`Only classes with a parent can ask for SuperConstructor!${resolvingMsg}`);
+          throw new Error(`${toString(constructor)} does not have a parent constructor. Only classes with a parent can ask for SuperConstructor!`);
         }
 
         constructorInfo = [SuperConstructor, this.params.length];
@@ -134,7 +116,7 @@ class FactoryProvider {
 
     for (var param of params) {
       if (param.token === SuperConstructorAnnotation) {
-        throw new Error('Only classes with a parent can ask for SuperConstructor!');
+        throw new Error(`${toString(factoryFunction)} is not a class. Only classes with a parent can ask for SuperConstructor!`);
       }
     }
   }
