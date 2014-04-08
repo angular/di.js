@@ -1,11 +1,12 @@
+// PUBLIC API
+
 export {Injector} from './injector';
 export {
   annotate,
-  SuperConstructor,
   Inject,
   InjectPromise,
   Provide,
   ProvidePromise,
-  hasAnnotation,
-  readAnnotations
+  SuperConstructor,
+  TransientScope
 } from './annotations';
