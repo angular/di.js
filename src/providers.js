@@ -61,7 +61,6 @@ class ClassProvider {
   // but it is only called during the constructor.
   // TODO(vojta): remove the annotations argument?
   _flattenParams(constructor, params) {
-    var token;
     var SuperConstructor;
     var constructorInfo;
 
@@ -107,7 +106,7 @@ class ClassProvider {
     return function InjectedAndBoundSuperConstructor() {
       // TODO(vojta): throw if arguments given
       return constructorInfo[0].apply(context, argsForCurrentConstructor);
-    }
+    };
   }
 
   // It is called by injector to create an instance.

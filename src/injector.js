@@ -232,7 +232,6 @@ class Injector {
         // get rid off the @ProvidePromise and just check the returned value, whether it is
         // a promise or not.
         return instance;
-
       });
     }
 
