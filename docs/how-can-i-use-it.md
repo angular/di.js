@@ -1,7 +1,4 @@
 # How can I use it?
-Note, that this framework is still in the state of a prototype - **I don't recommend using it in production yet**.
-
-That said, please do experiment with it and let me know what you think...
 
 ## In the browser
 See the [kitchen-di example](../example/kitchen-di/index.html) on how to use the DI with [RequireJS].
