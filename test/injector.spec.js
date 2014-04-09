@@ -309,6 +309,19 @@ describe('injector', function() {
   });
 
 
+  it('should throw an error when null/undefined token requested', function() {
+    var injector = new Injector();
+
+    expect(function() {
+      injector.get(null);
+    }).toThrowError(/Invalid token "null" requested!/);
+
+    expect(function() {
+      injector.get(undefined);
+    }).toThrowError(/Invalid token "undefined" requested!/);
+  });
+
+
   it('should provide itself', function() {
     var injector = new Injector();
 

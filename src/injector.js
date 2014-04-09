@@ -115,6 +115,11 @@ class Injector {
     var instance;
     var injector = this;
 
+    if (token === null || token === undefined) {
+      resolvingMsg = constructResolvingMessage(resolving, token);
+      throw new Error(`Invalid token "${token}" requested!${resolvingMsg}`);
+    }
+
     // Special case, return itself.
     if (token === Injector) {
       if (wantPromise) {
