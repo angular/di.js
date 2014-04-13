@@ -1,8 +1,11 @@
-var Engine = function() {}
+var Engine = function() {
+  this.state = 'stopped';
+};
 
 Engine.prototype = {
   start: function() {
     console.log('Starting engine...');
+    this.state = 'running';
   }
 };
 
