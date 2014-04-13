@@ -11,6 +11,6 @@ Car.prototype = {
   }
 };
 
-di.annotate(Car, new di.InjectAnnotation(Engine));
+di.annotate(Car, new di.Inject(Engine));
 
 module.exports = Car;
