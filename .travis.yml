@@ -7,6 +7,7 @@ env:
   global:
     - SAUCE_USERNAME=angular-ci
     - SAUCE_ACCESS_KEY=9b988f434ff8-fbca-8aa4-4ae3-35442987
+    - TRAVIS_BROWSERS=SL_Chrome
 
 install:
   - npm install
@@ -16,6 +17,6 @@ install:
 before_script:
 
 script:
-  - karma start --single-run --browsers SL_Chrome --reporters dots
+  - make test
 
 after_script:
