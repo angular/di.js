@@ -6,7 +6,7 @@ import {
   TransientScope as TransientScopeAnnotation
 } from './annotations';
 import {isFunction, toString} from './util';
-import {getUniqueId} from './profiler';
+import {profileInjector} from './profiler';
 import {createProviderFromFnOrClass} from './providers';
 
 
@@ -41,9 +41,10 @@ class Injector {
     this.cache = new Map();
     this.providers = providers;
     this.parent = parentInjector;
-    this.id = getUniqueId();
 
     this._loadModules(modules);
+
+    profileInjector(this, Injector);
   }
 
 
@@ -291,24 +292,6 @@ class Injector {
     }
 
     return new Injector(modules, this, forcedProviders);
-  }
-
-
-  dump() {
-    var serialized = {
-      id: this.id,
-      parent_id: this.parent ? this.parent.id : null,
-      providers: {}
-    };
-
-    Object.keys(this.providers).forEach((token) => {
-      serialized.providers[token] = {
-        name: token,
-        dependencies: this.providers[token].params
-      };
-    });
-
-    return serialized;
   }
 }
 
