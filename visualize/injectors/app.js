@@ -330,6 +330,11 @@ app.controller('Main', function($scope, data) {
   var links = [];
 
   data.success(function(data) {
+    if (!data) {
+      $scope.message = 'Enable DI profiling by appending ?di_debug into the url.';
+      return;
+    }
+
     var injectors = data.injectors;
     var injectorsMap = {};
     var rootInjectors = [];
@@ -354,26 +359,26 @@ app.controller('Main', function($scope, data) {
       }
 
       // Process all providers defined in this injector.
-      Object.keys(injector.providers).forEach(function(name) {
-        var provider = injector.providers[name];
+      Object.keys(injector.providers).forEach(function(id) {
+        var provider = injector.providers[id];
 
-        providersMap[name] = providersMap[name] || [];
-        providersMap[name].push(provider);
+        providersMap[id] = providersMap[id] || [];
+        providersMap[id].push(provider);
 
         // Compute override links.
-        if (parent && parent.providers[name]) {
-          links.push({source: parent.providers[name], target: provider, type: 'override'});
+        if (parent && parent.providers[id]) {
+          links.push({source: parent.providers[id], target: provider, type: 'override'});
         }
 
         // Compute dependency links.
         provider.dependencies.forEach(function(dep) {
-          if (injector.providers[dep]) {
-            links.push({source: provider, target: injector.providers[dep], type: 'dependency'});
+          if (injector.providers[dep.token]) {
+            links.push({source: provider, target: injector.providers[dep.token], type: 'dependency', isPromise: dep.isPromise, isLazy: dep.isLazy});
           } else {
             var pivot = parent;
             while (pivot) {
-              if (pivot.providers[dep]) {
-                links.push({source: provider, target: pivot.providers[dep], type: 'dependency'});
+              if (pivot.providers[dep.token]) {
+                links.push({source: provider, target: pivot.providers[dep.token], type: 'dependency', isPromise: dep.isPromise, isLazy: dep.isLazy});
                 break;
               } else {
                 pivot = pivot.parent_id && injectorsMap[pivot.parent_id] || null;
@@ -388,32 +393,38 @@ app.controller('Main', function($scope, data) {
       });
     });
 
-    $scope.providers = Object.keys(providersMap).map(function(name) {
+    $scope.providers = Object.keys(providersMap).map(function(id) {
       return {
-        name: name,
+        id: id,
+        name: providersMap[id][0].name,
         highlighted: false
       };
     });
 
-    $scope.$broadcast('graph_data_changed', rootInjectors[0], links);
+    var fakeRoot = rootInjectors.length > 1 ? {
+      type: 'fake-root',
+      children: rootInjectors
+    } : rootInjectors;
+
+    $scope.$broadcast('graph_data_changed', fakeRoot, links);
   });
 
-  var highlightProviders = function(name, highlighted) {
+  var highlightProviders = function(id, highlighted) {
     // Highlight the provider name in the list.
     $scope.providers.forEach(function(provider) {
-      if (provider.name === name) {
+      if (provider.id === id) {
         provider.highlighted = highlighted;
       }
     });
 
     // Highlight all the circles in the graph.
-    providersMap[name].forEach(function(p) {
+    providersMap[id].forEach(function(p) {
       p.highlighted = highlighted;
     });
 
     // Highlight all the "override" links in the graph.
     links.forEach(function(link) {
-      if (link.type === 'override' && link.source.name === name) {
+      if (link.type === 'override' && link.source.id === id) {
         link.highlighted = highlighted;
       }
     });
@@ -421,15 +432,15 @@ app.controller('Main', function($scope, data) {
     $scope.$broadcast('graph_data_changed');
   };
 
-  var highlightAllProvidersByName = function(name, highlighted) {
-    providersMap[name].forEach(function(p) {
+  var highlightAllProvidersById = function(id, highlighted) {
+    providersMap[id].forEach(function(p) {
       p.highlighted = highlighted;
     });
   };
 
-  var highlightOverrideLinksForProviderByName = function(name, highlighted) {
+  var highlightOverrideLinksForProviderById = function(id, highlighted) {
     links.forEach(function(link) {
-      if (link.type === 'override' && link.source.name === name) {
+      if (link.type === 'override' && link.source.id === id) {
         link.highlighted = highlighted;
       }
     });
@@ -454,8 +465,8 @@ app.controller('Main', function($scope, data) {
   $scope.highlight = function(provider, highlighted) {
     provider.highlighted = highlighted;
 
-    highlightAllProvidersByName(provider.name, highlighted);
-    highlightOverrideLinksForProviderByName(provider.name, highlighted);
+    highlightAllProvidersById(provider.id, highlighted);
+    highlightOverrideLinksForProviderById(provider.id, highlighted);
 
     $scope.$broadcast('graph_data_changed');
   };
@@ -491,6 +502,29 @@ app.controller('Main', function($scope, data) {
 
   $scope.$on('graph_click', function(_, d) {
     console.log(d)
+    if (d.type === 'provider') {
+      evalInInspectedWindow(function(window, args) {
+        var tokenId = args[0];
+        var injectorId = args[1];
+        var injector;
+        var token;
+
+        window.__di_dump__.tokens.forEach(function(id, instance) {
+          if (id === tokenId) token = instance;
+          if (id === injectorId) injector = instance;
+        })
+        window.console.log(injector.get(token));
+      }, [d.id, d.parent.id], function() {});
+    } else if (d.type === 'injector') {
+      evalInInspectedWindow(function(window, args) {
+        var injectorId = args[0];
+        var injector;
+        window.__di_dump__.tokens.forEach(function(id, instance) {
+          if (id === injectorId) injector = instance;
+        })
+        window.console.log(injector);
+      }, [d.id], function() {});
+    }
   });
 });
 

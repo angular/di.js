@@ -1,0 +1,14 @@
+{
+  "name": "DI visualizer",
+  "version": "0.0.1",
+  "description": "",
+  "background": {
+    "page": "background.html"
+  },
+  "devtools_page": "devtools_background.html",
+  "manifest_version": 2,
+  "permissions": [
+    "tabs",
+    "<all_urls>"
+  ]
+}

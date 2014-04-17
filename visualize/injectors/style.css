@@ -17,6 +17,11 @@ label {
   cursor: pointer;
 }
 
+.fake-root {
+  stroke: 0;
+  fill: none;
+}
+
 .injector circle {
   fill: #0a629f;
   fill-opacity: .2;

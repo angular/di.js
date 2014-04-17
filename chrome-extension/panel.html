@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <meta charset="utf-8">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="visualize/injectors/style.css">
 <title>Visualization of injectors</title>
 
 <body ng-app="di-visualiser" ng-controller="Main" ng-cloak>
 
-  <span class="message">{{message}}</span>
+  <span ng-show="message">{{message}}</span>
 
   <div class="control-panel">
     <ul class="providers" ng-show="providers.length">
@@ -24,9 +24,14 @@
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
 -->
 
-<script src="../lib/d3.v3.js"></script>
-<script src="../lib/angular.js"></script>
+<script src="visualize/lib/d3.v3.js"></script>
+<script src="visualize/lib/angular.js"></script>
 
-<script src="app.js"></script>
+<script src="visualize/injectors/app.js"></script>
+<script src="panel.js"></script>
 
 </body>
+
+
+</body>
+</html>
