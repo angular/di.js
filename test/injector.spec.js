@@ -378,6 +378,66 @@ describe('injector', function() {
     });
 
 
+    it("should look up param dependencies starting at the calling injector", function() {
+
+      @Provide('engine')
+      class Engine {}
+
+      @Provide('engine')
+      class MockEngine {}
+
+      class Car {
+        @Inject('engine')
+        constructor(engine) {
+          this.engine = engine;
+        }
+      }
+
+      var parent = new Injector([Car, Engine]);
+      var child = parent.createChild([MockEngine]);
+
+      // Since we are asking for the car from the child injector, the MockEngine
+      // in the child injector should be provided as a dependency to the car
+      // rather than the real Engine in the parent
+      var car = child.get(Car);
+      expect(car.engine).toBeInstanceOf(MockEngine);
+    });
+
+    it("should cache services in the youngest referenced injector", function() {
+
+      @Provide('engine')
+      class Engine {}
+
+      @Provide('engine')
+      class MockEngine {}
+
+      class Car {
+        @Inject('engine')
+        constructor(engine) {
+          this.engine = engine;
+        }
+      }
+
+      var parent = new Injector([Car, Engine]);
+      var child = parent.createChild([MockEngine]);
+      var grandChild = child.createChild();
+
+      // Since we ask for the car from the grandChild, we get a car that has a dependency
+      // on the MockEngine in the child injector.  Therefore the car that is returned
+      // should be cached in the child injector
+      var mockCar = grandChild.get(Car);
+      expect(mockCar.engine).toBeInstanceOf(MockEngine);
+      expect(mockCar).toBe(child.get(Car));
+
+      // Now if we ask for the car from the parent, we should get a new object since
+      // at this level the MockEngine is not defined and the Car is not cached
+      var realCar = parent.get(Car);
+      expect(realCar).not.toBe(mockCar);
+      expect(realCar.engine).toBeInstanceOf(Engine);
+
+    });
+
+
     it('should force new instances by annotation', function() {
       class RouteScope {}
 
