@@ -30,6 +30,10 @@ function toString(token) {
     return token;
   }
 
+  if (token === undefined || token === null) {
+    return '' + token;
+  }
+
   if (token.name) {
     return token.name;
   }

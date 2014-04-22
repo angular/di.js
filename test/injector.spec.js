@@ -322,6 +322,26 @@ describe('injector', function() {
   });
 
 
+  // regression
+  it('should show the full path when null/undefined token requested', function() {
+    @Inject(undefined)
+    class Foo {}
+
+    @Inject(null)
+    class Bar {}
+
+    var injector = new Injector();
+
+    expect(function() {
+      injector.get(Foo);
+    }).toThrowError(/Invalid token "undefined" requested! \(Foo -> undefined\)/);
+
+    expect(function() {
+      injector.get(Bar);
+    }).toThrowError(/Invalid token "null" requested! \(Bar -> null\)/);
+  });
+
+
   it('should provide itself', function() {
     var injector = new Injector();
 
