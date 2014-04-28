@@ -1,5 +1,6 @@
 import {
   hasAnnotation,
+  hasParameterAnnotation,
   readAnnotations,
   Inject,
   InjectLazy,
@@ -39,6 +40,28 @@ describe('hasAnnotation', function() {
     function foo() {}
 
     expect(hasAnnotation(foo, NopeAnnotation)).toBe(false);
+  });
+});
+
+
+describe('hasParameterAnnotation', function() {
+
+  it('should return false if no annotation', function() {
+    class FooAnnotation {}
+
+    function nothing() {}
+
+    expect(hasParameterAnnotation(nothing, FooAnnotation)).toBe(false);
+  });
+
+
+  it('should return if at least one parameter has specific annotation', function() {
+    class FooAnnotation {}
+    class BarType {}
+
+    function nothing(one: BarType, @FooAnnotation two: BarType) {}
+
+    expect(hasParameterAnnotation(nothing, FooAnnotation)).toBe(true);
   });
 });
 

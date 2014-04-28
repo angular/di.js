@@ -2,12 +2,14 @@ import {
   annotate,
   readAnnotations,
   hasAnnotation,
+  hasParameterAnnotation,
   Provide as ProvideAnnotation,
+  Inject as InjectAnnotation,
   TransientScope as TransientScopeAnnotation
 } from './annotations';
-import {isFunction, toString} from './util';
+import {isFunction, isObject, toString} from './util';
 import {profileInjector} from './profiler';
-import {createProviderFromFnOrClass} from './providers';
+import {createProviderFromFnOrClass, createProviderFromValue} from './providers';
 
 
 function constructResolvingMessage(resolving, token) {
@@ -143,6 +145,7 @@ class Injector {
                 return args[ii + 1];
               };
 
+              annotate(fn, new InjectAnnotation());
               annotate(fn, new ProvideAnnotation(args[ii]));
 
               return fn;
@@ -176,9 +179,15 @@ class Injector {
     provider = this.providers.get(token);
 
     // No provider defined (overriden), use the default provider (token).
-    if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
-      provider = createProviderFromFnOrClass(token, readAnnotations(token));
-      this.providers.set(token, provider);
+    if (!provider && !this._hasProviderFor(token)) {
+      if (isFunction(token) && (hasAnnotation(token, InjectAnnotation)) || hasParameterAnnotation(token, InjectAnnotation)) {
+        provider = createProviderFromFnOrClass(token, readAnnotations(token));
+        this.providers.set(token, provider);
+      } else if (isFunction(token) || isObject(token)) {
+        // If the token is an object or a non-annotated function, we inject it as a value.
+        provider = createProviderFromValue(token);
+        this.providers.set(token, provider);
+      }
     }
 
     if (!provider) {

@@ -82,6 +82,23 @@ function hasAnnotation(fn, annotationClass) {
 }
 
 
+function hasParameterAnnotation(fn, AnnotationClass) {
+  if (!fn.parameters || fn.parameters.length === 0) {
+    return false;
+  }
+
+  for (var parameterAnnotations of fn.parameters) {
+    for (var annotation of parameterAnnotations) {
+      if (annotation instanceof AnnotationClass) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+
 // Read annotations on a function or class and collect "interesting" metadata:
 function readAnnotations(fn) {
   var collectedAnnotations = {
@@ -143,6 +160,7 @@ function readAnnotations(fn) {
 export {
   annotate,
   hasAnnotation,
+  hasParameterAnnotation,
   readAnnotations,
 
   SuperConstructor,

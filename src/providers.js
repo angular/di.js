@@ -127,10 +127,32 @@ class FactoryProvider {
 }
 
 
+// ValueProvider knows how to return values.
+//
+// This is a trivial provider that just always returns the same value,
+// without requiring any arguments.
+class ValueProvider {
+  constructor(value) {
+    this.provider = function() {};
+    this.params = [];
+    this.isPromise = false;
+    this._value = value;
+  }
+
+  create() {
+    return this._value;
+  }
+}
+
+
 export function createProviderFromFnOrClass(fnOrClass, annotations) {
   if (isClass(fnOrClass)) {
     return new ClassProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
   }
 
   return new FactoryProvider(fnOrClass, annotations.params, annotations.provide.isPromise);
+}
+
+export function createProviderFromValue(value) {
+  return new ValueProvider(value);
 }

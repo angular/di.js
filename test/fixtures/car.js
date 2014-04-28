@@ -23,6 +23,8 @@ export class CyclicEngine {
 // @Inject(Engine)
 annotate(Car, new Inject(Engine));
 
+// @Inject
+annotate(createEngine, new Inject());
 // @Provide(Engine)
 annotate(createEngine, new Provide(Engine));
 

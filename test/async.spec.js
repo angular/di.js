@@ -5,11 +5,13 @@ import {Injector} from '../src/injector';
 class UserList {}
 
 // An async provider.
+@Inject
 @ProvidePromise(UserList)
 function fetchUsers() {
   return Promise.resolve(new UserList);
 }
 
+@Inject
 class SynchronousUserList {}
 
 class UserController {
