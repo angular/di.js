@@ -20,6 +20,12 @@ require.config({
     'rtts-assert': './node_modules/rtts-assert/src/assert'
   },
 
+  map: {
+    '*': {
+      'di': 'src/index'
+    }
+  },
+
   // Dynamically load all test files and ES6 polyfill.
   deps: allTestFiles.concat(['node_modules/es6-shim/es6-shim', 'test/matchers']),
 

@@ -1,4 +1,4 @@
-import {Inject} from '../../src/annotations';
+import {Inject} from 'di';
 
 import {Heater} from './heater';
 
