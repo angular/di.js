@@ -340,6 +340,7 @@ describe('injector', function() {
 
   describe('transient', function() {
 
+
     it('should never cache', function() {
       @TransientScope
       class Foo {}
