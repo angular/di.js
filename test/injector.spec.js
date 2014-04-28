@@ -9,6 +9,7 @@ import {module as shinyHouseModule} from './fixtures/shiny_house';
 describe('injector', function() {
 
   it('should instantiate a class without dependencies', function() {
+    @Inject
     class Car {
       constructor() {}
       start() {}
@@ -22,6 +23,7 @@ describe('injector', function() {
 
 
   it('should resolve dependencies based on @Inject annotation', function() {
+    @Inject
     class Engine {
       start() {}
     }
@@ -57,6 +59,7 @@ describe('injector', function() {
       start() {}
     }
 
+    @Inject
     @Provide(Engine)
     class MockEngine {
       start() {}
@@ -73,6 +76,7 @@ describe('injector', function() {
   it('should allow factory function', function() {
     class Size {}
 
+    @Inject
     @Provide(Size)
     function computeSize() {
       return 0;
@@ -86,10 +90,12 @@ describe('injector', function() {
 
 
   it('should use type annotations when available', function() {
+    @Inject
     class Engine {
       start() {}
     }
 
+    @Inject
     class Car {
       constructor(e: Engine) {
         this.engine = e;
@@ -110,6 +116,7 @@ describe('injector', function() {
       start() {}
     }
 
+    @Inject
     class MockEngine extends Engine {
       start() {}
     }
@@ -131,14 +138,17 @@ describe('injector', function() {
 
 
   it('should use mixed @Inject with type annotations', function() {
+    @Inject
     class Engine {
       start() {}
     }
 
+    @Inject
     class Bumper {
       start() {}
     }
 
+    @Inject
     class Car {
       constructor(e: Engine, @Inject(Bumper) b) {
         this.engine = e;
@@ -161,6 +171,7 @@ describe('injector', function() {
       constructor() {}
       start() {}
     }
+    @Inject
 
     var injector = new Injector();
     var car = injector.get(Car);
@@ -194,6 +205,7 @@ describe('injector', function() {
 
 
   it('should show the full path when error happens in a constructor', function() {
+    @Inject
     class Engine {
       constructor() {
         throw new Error('This engine is broken!');
@@ -213,6 +225,7 @@ describe('injector', function() {
 
 
   it('should support "super" to call a parent constructor', function() {
+    @Inject
     class Something {}
 
     class Parent {
@@ -240,7 +253,10 @@ describe('injector', function() {
 
 
   it('should support "super" to call multiple parent constructors', function() {
+    @Inject
     class Foo {}
+
+    @Inject
     class Bar {}
 
     class Parent {
@@ -345,9 +361,51 @@ describe('injector', function() {
   });
 
 
+  describe('default providers', function() {
+
+    it('should inject the value for object tokens', function() {
+      var foo = {
+        bar: true
+      };
+
+      @Inject(foo)
+      class Bar {
+        constructor(foo) {
+          this.foo = foo;
+        }
+      }
+
+      var injector = new Injector();
+      var bar = injector.get(Bar);
+
+      expect(bar.foo).toBe(foo);
+    });
+
+
+    it('should inject the value for non-annotated functions', function() {
+      var fs = {
+        readFile: function() {}
+      };
+
+      @Inject(fs.readFile)
+      class Foo {
+        constructor(readFile) {
+          this.readFile = readFile;
+        }
+      }
+
+      var injector = new Injector();
+      var foo = injector.get(Foo);
+
+      expect(foo.readFile).toBe(fs.readFile);
+    });
+  });
+
+
   describe('transient', function() {
     it('should never cache', function() {
       @TransientScope
+      @Inject
       class Foo {}
 
       var injector = new Injector();
@@ -359,6 +417,7 @@ describe('injector', function() {
   describe('child', function() {
 
     it('should load instances from parent injector', function() {
+      @Inject
       class Car {
         start() {}
       }
@@ -374,6 +433,7 @@ describe('injector', function() {
 
 
     it('should create new instance in a child injector', function() {
+      @Inject
       class Car {
         start() {}
       }
@@ -397,6 +457,7 @@ describe('injector', function() {
     it('should force new instances by annotation', function() {
       class RouteScope {}
 
+      @Inject
       class Engine {
         start() {}
       }
@@ -425,10 +486,12 @@ describe('injector', function() {
     it('should force new instances by annotation using overriden provider', function() {
       class RouteScope {}
 
+      @Inject
       class Engine {
         start() {}
       }
 
+      @Inject
       @RouteScope
       @Provide(Engine)
       class MockEngine {
@@ -451,12 +514,14 @@ describe('injector', function() {
     it('should force new instance by annotation using the lowest overriden provider', function() {
       class RouteScope {}
 
+      @Inject
       @RouteScope
       class Engine {
         constructor() {}
         start() {}
       }
 
+      @Inject
       @RouteScope
       @Provide(Engine)
       class MockEngine {
@@ -464,6 +529,7 @@ describe('injector', function() {
         start() {}
       }
 
+      @Inject
       @RouteScope
       @Provide(Engine)
       class DoubleMockEngine {
@@ -508,6 +574,7 @@ describe('injector', function() {
     it('should instantiate lazily', function() {
       var constructorSpy = jasmine.createSpy('constructor');
 
+      @Inject
       class ExpensiveEngine {
         constructor() {
           constructorSpy();
@@ -540,6 +607,7 @@ describe('injector', function() {
     it('should instantiate lazily from a parent injector', function() {
       var constructorSpy = jasmine.createSpy('constructor');
 
+      @Inject
       class ExpensiveEngine {
         constructor() {
           constructorSpy();

@@ -1,6 +1,8 @@
-import {Provide} from 'di';
+import {Inject, Provide} from 'di';
 import {Heater} from './coffee_maker/heater';
 
+
+@Inject
 @Provide(Heater)
 export class MockHeater {
   constructor() {}
