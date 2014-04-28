@@ -44,9 +44,7 @@ describe('injector', function() {
 
 
   it('should override providers', function() {
-    class Engine {
-      start() {}
-    }
+    class Engine {}
 
     @Inject(Engine)
     class Car {
@@ -97,7 +95,7 @@ describe('injector', function() {
       start() {}
     }
 
-    var injector = new Injector([]);
+    var injector = new Injector();
     var car = injector.get(Car);
 
     expect(car).toBeInstanceOf(Car);
@@ -106,9 +104,7 @@ describe('injector', function() {
 
 
   it('should use @Inject over type annotations', function() {
-    class Engine {
-      start() {}
-    }
+    class Engine {}
 
     class MockEngine extends Engine {
       start() {}
@@ -157,10 +153,7 @@ describe('injector', function() {
 
 
   it('should cache instances', function() {
-    class Car {
-      constructor() {}
-      start() {}
-    }
+    class Car {}
 
     var injector = new Injector();
     var car = injector.get(Car);
@@ -215,8 +208,8 @@ describe('injector', function() {
   it('should support "super" to call a parent constructor', function() {
     class Something {}
 
+    @Inject(Something)
     class Parent {
-      @Inject(Something)
       constructor(something) {
         this.parentSomething = something;
       }
@@ -243,8 +236,8 @@ describe('injector', function() {
     class Foo {}
     class Bar {}
 
+    @Inject(Foo)
     class Parent {
-      @Inject(Foo)
       constructor(foo) {
         this.parentFoo = foo;
       }
@@ -346,6 +339,7 @@ describe('injector', function() {
 
 
   describe('transient', function() {
+
     it('should never cache', function() {
       @TransientScope
       class Foo {}
@@ -600,6 +594,5 @@ describe('injector', function() {
         expect(mustangEngine).not.toBe(mustangEngine2);
       });
     });
-
   });
 });
