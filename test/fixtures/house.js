@@ -1,5 +1,9 @@
-import {annotate, Inject, Provide} from '../../src/annotations';
+import {Inject, Provide} from '../../src/annotations';
 
+// This is an example of using string as tokens.
+
+@Provide('House')
+@Inject('Kitchen')
 export class House {
   constructor(kitchen) {
 
@@ -8,6 +12,8 @@ export class House {
   nothing() {}
 }
 
+@Provide('Kitchen')
+@Inject('Sink')
 export class Kitchen {
   constructor(sink) {
 
@@ -17,14 +23,9 @@ export class Kitchen {
 }
 
 // Sink is missing.
+// @Provide('Sink')
 // export class Sink {
 //   nothing() {}
 // }
 
-
-
-// @Inject('Kitchen')
-annotate(House, new Inject('Kitchen'));
-
-// @Inject('Sink')
-annotate(Kitchen, new Inject('Sink'));
+export var module = [House, Kitchen];

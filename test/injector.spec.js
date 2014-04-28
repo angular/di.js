@@ -1,11 +1,11 @@
 import {Injector} from '../src/injector';
 import {Inject, Provide, SuperConstructor, InjectLazy, TransientScope} from '../src/annotations';
 
-module carModule from './fixtures/car';
-module houseModule from './fixtures/house';
-module shinyHouseModule from './fixtures/shiny_house';
+import {Car, CyclicEngine} from './fixtures/car';
+import {module as houseModule} from './fixtures/house';
+import {module as shinyHouseModule} from './fixtures/shiny_house';
 
-// TODO(vojta): refactor to not use strings once we can do toString() on classes
+
 describe('injector', function() {
 
   it('should instantiate a class without dependencies', function() {
@@ -178,7 +178,7 @@ describe('injector', function() {
 
 
   it('should show the full path when no provider defined', function() {
-    var injector = new Injector([houseModule]);
+    var injector = new Injector(houseModule);
 
     expect(() => injector.get('House'))
         .toThrowError('No provider for Sink! (House -> Kitchen -> Sink)');
@@ -186,13 +186,9 @@ describe('injector', function() {
 
 
   it('should throw when trying to instantiate a cyclic dependency', function() {
-    var useCyclicEngineModule = {
-      Engine: carModule.CyclicEngine
-    };
+    var injector = new Injector([CyclicEngine]);
 
-    var injector = new Injector([carModule, useCyclicEngineModule]);
-
-    expect(() => injector.get('Car'))
+    expect(() => injector.get(Car))
         .toThrowError('Cannot instantiate cyclic dependency! (Car -> Engine -> Car)');
   });
 
@@ -490,8 +486,8 @@ describe('injector', function() {
 
 
     it('should show the full path when no provider', function() {
-      var parent = new Injector([houseModule]);
-      var child = parent.createChild([shinyHouseModule]);
+      var parent = new Injector(houseModule);
+      var child = parent.createChild(shinyHouseModule);
 
       expect(() => child.get('House'))
           .toThrowError('No provider for Sink! (House -> Kitchen -> Sink)');

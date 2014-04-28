@@ -1,11 +1,11 @@
-import {annotate, Inject} from '../../src/annotations';
+import {Inject, Provide} from '../../src/annotations';
 
+@Provide('House')
+@Inject('Kitchen')
 export class ShinyHouse {
   constructor(kitchen) {}
 
   nothing() {}
 }
 
-
-// @Inject('Kitchen')
-annotate(ShinyHouse, new Inject('Kitchen'));
+export var module = [ShinyHouse];

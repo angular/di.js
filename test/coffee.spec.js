@@ -1,24 +1,21 @@
 import {Injector} from '../src/injector';
 
+import {module as coffeeModule} from '../example/coffee/coffee_module';
+import {CoffeeMaker} from '../example/coffee/coffee_maker';
 import {MockHeater} from '../example/coffee/mock_heater';
-module coffeeModule from '../example/coffee/coffee_module';
 
 
 describe('coffee example', function() {
   it('should work', function() {
-    var i = new Injector([coffeeModule]);
+    var i = new Injector(coffeeModule);
 
-    i.get('CoffeeMaker').brew();
+    i.get(CoffeeMaker).brew();
   });
 
 
   it('should work with mocked heater', function() {
-    var mockModule = {
-      Heater: MockHeater
-    };
+    var i = new Injector([MockHeater]);
 
-    var i = new Injector([coffeeModule, mockModule]);
-
-    i.get('CoffeeMaker').brew();
+    i.get(CoffeeMaker).brew();
   });
 });

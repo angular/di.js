@@ -1,5 +1,7 @@
 import {annotate, Inject, Provide} from '../../src/annotations';
 
+export class Engine {}
+
 export class Car {
   constructor(engine) {
     this.engine = engine;
@@ -14,19 +16,17 @@ export function createEngine() {
 
 export class CyclicEngine {
   constructor(car) {}
-
-  start() {}
 }
 
+// This is an example of using annotate helper, instead of annotations.
 
+// @Inject(Engine)
+annotate(Car, new Inject(Engine));
 
-// @Inject('Engine')
-annotate(Car, new Inject('Engine'));
-// @Provide()
-annotate(Car, new Provide('Car'));
+// @Provide(Engine)
+annotate(createEngine, new Provide(Engine));
 
-// @Provide('Engine')
-annotate(createEngine, new Provide('Engine'));
-
-// @Inject('Car')
-annotate(CyclicEngine, new Inject('Car'));
+// @Inject(Car)
+annotate(CyclicEngine, new Inject(Car));
+// @Provide(Engine)
+annotate(CyclicEngine, new Provide(Engine));
