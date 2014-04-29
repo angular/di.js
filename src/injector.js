@@ -110,6 +110,7 @@ class Injector {
   // Return an instance for given token.
   get(token, resolving = [], wantPromise = false, wantLazy = false) {
     var resolvingMsg = '';
+    var provider;
     var instance;
     var injector = this;
 
@@ -158,22 +159,21 @@ class Injector {
     // Check if there is a cached instance already.
     if (this.cache.has(token)) {
       instance = this.cache.get(token);
+      provider = this.providers.get(token);
 
-      if (this.providers.get(token).isPromise) {
-        if (!wantPromise) {
-          resolvingMsg = constructResolvingMessage(resolving, token);
-          throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
-        }
-      } else {
-        if (wantPromise) {
-          return Promise.resolve(instance);
-        }
+      if (provider.isPromise && !wantPromise) {
+        resolvingMsg = constructResolvingMessage(resolving, token);
+        throw new Error(`Cannot instantiate ${toString(token)} synchronously. It is provided as a promise!${resolvingMsg}`);
+      }
+
+      if (!provider.isPromise && wantPromise) {
+        return Promise.resolve(instance);
       }
 
       return instance;
     }
 
-    var provider = this.providers.get(token);
+    provider = this.providers.get(token);
 
     // No provider defined (overriden), use the default provider (token).
     if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
