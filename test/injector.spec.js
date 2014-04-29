@@ -394,6 +394,76 @@ describe('injector', function() {
     });
 
 
+    it("should look up param dependencies starting at the calling injector", function() {
+
+      @Provide('engine')
+      class Engine {}
+
+      @Provide('engine')
+      class MockEngine {}
+
+      class Car {
+        @Inject('engine')
+        constructor(engine) {
+          this.engine = engine;
+        }
+      }
+
+      var parent = new Injector([Car, Engine]);
+      var child = parent.createChild([MockEngine]);
+
+      // Since we are asking for the car from the child injector, the MockEngine
+      // in the child injector should be provided as a dependency to the car
+      // rather than the real Engine in the parent
+      var car = child.get(Car);
+      expect(car.engine).toBeInstanceOf(MockEngine);
+    });
+
+    it("should return objects with the correct dependencies if new instances are forced", function() {
+
+      @Provide('engine')
+      class Engine {}
+
+      @Provide('engine')
+      class MockEngine {}
+
+      class LocalScope {}
+
+      @LocalScope
+      class Car {
+        @Inject('engine')
+        constructor(engine) {
+          this.engine = engine;
+        }
+      }
+
+      var parent = new Injector([Car, Engine]);
+      var child = parent.createChild([MockEngine], [LocalScope]);
+      var grandChild = child.createChild();
+
+      // If we ask for the car from the parent, we should get a real car since
+      // at this level the MockEngine is not defined
+      var realCar = parent.get(Car);
+      expect(realCar.engine).toBeInstanceOf(Engine);
+
+      // If we ask for the car from the child, we should get a new instance, because
+      // of the @LocalScope annotation, and this instance should depend upon MockEngine
+      var mockCar = child.get(Car);
+      expect(mockCar.engine).toBeInstanceOf(MockEngine);
+
+      // If we ask for the car from the grandChild, we should get the mock car
+      // that was cached the child injector
+      var mockCar2 = grandChild.get(Car);
+      expect(mockCar2.engine).toBeInstanceOf(MockEngine);
+      expect(mockCar).toBe(mockCar2);
+
+      // Now if we ask for the car from the parent again, we should get the cached
+      // instance
+      var realCar2 = parent.get(Car);
+      expect(realCar2).toBe(realCar);
+    });
+
+
     it('should force new instances by annotation', function() {
       class RouteScope {}
 
