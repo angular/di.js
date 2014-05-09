@@ -347,7 +347,35 @@ describe('injector', function() {
 
       var injector = new Injector();
       expect(injector.get(Foo)).not.toBe(injector.get(Foo));
-    })
+    });
+
+
+    it('should always use dependencies (default providers) from the youngest injector', function() {
+      @Inject
+      class Foo {}
+
+      @TransientScope
+      @Inject(Foo)
+      class AlwaysNewInstance {
+        constructor(foo) {
+          this.foo = foo;
+        }
+      }
+
+      var injector = new Injector();
+      var child = injector.createChild([Foo]); // force new instance of Foo
+
+      var fooFromChild = child.get(Foo);
+      var fooFromParent = injector.get(Foo);
+
+      var alwaysNew1 = child.get(AlwaysNewInstance);
+      var alwaysNew2 = child.get(AlwaysNewInstance);
+      var alwaysNewFromParent = injector.get(AlwaysNewInstance);
+
+      expect(alwaysNew1.foo).toBe(fooFromChild);
+      expect(alwaysNew2.foo).toBe(fooFromChild);
+      expect(alwaysNewFromParent.foo).toBe(fooFromParent);
+    });
   });
 
 
@@ -495,6 +523,37 @@ describe('injector', function() {
 
       expect(child.get(Injector)).toBe(child);
     });
+
+
+    it('should cache default provider in parent injector', function() {
+      @Inject
+      class Foo {}
+
+      var parent = new Injector();
+      var child = parent.createChild([]);
+
+      var fooFromChild = child.get(Foo);
+      var fooFromParent = parent.get(Foo);
+
+      expect(fooFromParent).toBe(fooFromChild);
+    });
+
+
+    it('should force new instance by annotation for default provider', function() {
+      class RequestScope {}
+
+      @Inject
+      @RequestScope
+      class Foo {}
+
+      var parent = new Injector();
+      var child = parent.createChild([], [RequestScope]);
+
+      var fooFromChild = child.get(Foo);
+      var fooFromParent = parent.get(Foo);
+
+      expect(fooFromParent).not.toBe(fooFromChild);
+    });
   });
 
 
@@ -568,6 +627,7 @@ describe('injector', function() {
       it('should always create a new instance', function() {
         var constructorSpy = jasmine.createSpy('constructor');
 
+        @TransientScope
         class ExpensiveEngine {
           constructor(@Inject('power') power) {
             constructorSpy();

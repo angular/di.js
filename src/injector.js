@@ -39,10 +39,11 @@ function constructResolvingMessage(resolving, token) {
 // - loading different "providers" and modules
 class Injector {
 
-  constructor(modules = [], parentInjector = null, providers = new Map()) {
+  constructor(modules = [], parentInjector = null, providers = new Map(), scopes = []) {
     this.cache = new Map();
     this.providers = providers;
     this.parent = parentInjector;
+    this.scopes = scopes;
 
     this._loadModules(modules);
 
@@ -104,6 +105,27 @@ class Injector {
     }
 
     return false;
+  }
+
+  // Find the correct injector where the default provider should be instantiated and cached.
+  _instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy) {
+    // In root injector, instantiate here.
+    // If annotated with TransientScope, instantiate here.
+    if (!this.parent || hasAnnotation(provider.provider, TransientScopeAnnotation)) {
+      this.providers.set(token, provider);
+      return this.get(token, resolving, wantPromise, wantLazy);
+    }
+
+    // Check if this injector forces new instance of this provider.
+    for (var ScopeClass of this.scopes) {
+      if (hasAnnotation(provider.provider, ScopeClass)) {
+        this.providers.set(token, provider);
+        return this.get(token, resolving, wantPromise, wantLazy);
+      }
+    }
+
+    // Otherwise ask parent injector.
+    return this.parent._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
   }
 
 
@@ -178,7 +200,7 @@ class Injector {
     // No provider defined (overriden), use the default provider (token).
     if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
       provider = createProviderFromFnOrClass(token, readAnnotations(token));
-      this.providers.set(token, provider);
+      return this._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
     }
 
     if (!provider) {
@@ -288,7 +310,7 @@ class Injector {
       this._collectProvidersWithAnnotation(annotation, forcedProviders);
     }
 
-    return new Injector(modules, this, forcedProviders);
+    return new Injector(modules, this, forcedProviders, forceNewInstancesOf);
   }
 }
 
