@@ -376,6 +376,34 @@ describe('injector', function() {
       expect(alwaysNew2.foo).toBe(fooFromChild);
       expect(alwaysNewFromParent.foo).toBe(fooFromParent);
     });
+
+
+    it('should always use dependencies from the youngest injector', function() {
+      @Inject
+      class Foo {}
+
+      @TransientScope
+      @Inject(Foo)
+      class AlwaysNewInstance {
+        constructor(foo) {
+          this.foo = foo;
+        }
+      }
+
+      var injector = new Injector([AlwaysNewInstance]);
+      var child = injector.createChild([Foo]); // force new instance of Foo
+
+      var fooFromChild = child.get(Foo);
+      var fooFromParent = injector.get(Foo);
+
+      var alwaysNew1 = child.get(AlwaysNewInstance);
+      var alwaysNew2 = child.get(AlwaysNewInstance);
+      var alwaysNewFromParent = injector.get(AlwaysNewInstance);
+
+      expect(alwaysNew1.foo).toBe(fooFromChild);
+      expect(alwaysNew2.foo).toBe(fooFromChild);
+      expect(alwaysNewFromParent.foo).toBe(fooFromParent);
+    });
   });
 
 

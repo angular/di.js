@@ -110,8 +110,7 @@ class Injector {
   // Find the correct injector where the default provider should be instantiated and cached.
   _instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy) {
     // In root injector, instantiate here.
-    // If annotated with TransientScope, instantiate here.
-    if (!this.parent || hasAnnotation(provider.provider, TransientScopeAnnotation)) {
+    if (!this.parent) {
       this.providers.set(token, provider);
       return this.get(token, resolving, wantPromise, wantLazy);
     }
@@ -305,6 +304,9 @@ class Injector {
   // It is possible to add additional providers and also force new instances of existing providers.
   createChild(modules = [], forceNewInstancesOf = []) {
     var forcedProviders = new Map();
+
+    // Always force new instance of TransientScope.
+    forceNewInstancesOf.push(TransientScopeAnnotation);
 
     for (var annotation of forceNewInstancesOf) {
       this._collectProvidersWithAnnotation(annotation, forcedProviders);
