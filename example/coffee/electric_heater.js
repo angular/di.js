@@ -1,7 +1,8 @@
-import {Provide} from 'di';
+import {Inject, Provide} from 'di';
 
 import {Heater} from './heater';
 
+@Inject()
 @Provide(Heater)
 export class ElectricHeater {
   constructor() {}
