@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "traceur": "~0.0.33",
-    "es6-shim": "paulmillr/es6-shim"
+    "es6-shim": "~0.11.0"
   },
   "devDependencies": {
     "rtts-assert": "angular/assert",
