@@ -33,17 +33,17 @@ class ClassProvider {
     this.isPromise = isPromise;
 
     this.params = [];
-    this.constructors = [];
+    this._constructors = [];
 
     this._flattenParams(clazz, params);
-    this.constructors.unshift([clazz, 0, this.params.length - 1]);
+    this._constructors.unshift([clazz, 0, this.params.length - 1]);
   }
 
   // Normalize params for all the constructors (in the case of inheritance),
   // into a single flat array of DependencyDesriptors.
   // So that the injector does not have to worry about inheritance.
   //
-  // This function mutates `this.params` and `this.constructors`,
+  // This function mutates `this.params` and `this._constructors`,
   // but it is only called during the constructor.
   // TODO(vojta): remove the annotations argument?
   _flattenParams(constructor, params) {
@@ -59,7 +59,7 @@ class ClassProvider {
         }
 
         constructorInfo = [SuperConstructor, this.params.length];
-        this.constructors.push(constructorInfo);
+        this._constructors.push(constructorInfo);
         this._flattenParams(SuperConstructor, readAnnotations(SuperConstructor).params);
         constructorInfo.push(this.params.length - 1);
       } else {
@@ -72,8 +72,8 @@ class ClassProvider {
   // We get arguments for all the constructors as a single flat array.
   // This method generates pre-bound "superConstructor" wrapper with correctly passing arguments.
   _createConstructor(currentConstructorIdx, context, allArguments) {
-    var constructorInfo = this.constructors[currentConstructorIdx];
-    var nextConstructorInfo = this.constructors[currentConstructorIdx + 1];
+    var constructorInfo = this._constructors[currentConstructorIdx];
+    var nextConstructorInfo = this._constructors[currentConstructorIdx + 1];
     var argsForCurrentConstructor;
 
     if (nextConstructorInfo) {

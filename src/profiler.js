@@ -48,7 +48,7 @@ function serializeProvider(provider, key, tokens) {
 function serializeInjector(injector, tokens, Injector) {
   var serializedInjector = {
     id: serializeToken(injector, tokens),
-    parent_id: injector.parent ? serializeToken(injector.parent, tokens) : null,
+    parent_id: injector._parent ? serializeToken(injector._parent, tokens) : null,
     providers: {}
   };
 
@@ -60,7 +60,7 @@ function serializeInjector(injector, tokens, Injector) {
     dependencies: []
   };
 
-  injector.providers.forEach(function(provider, key) {
+  injector._providers.forEach(function(provider, key) {
     var serializedProvider = serializeProvider(provider, key, tokens);
     serializedInjector.providers[serializedProvider.id] = serializedProvider;
   });
