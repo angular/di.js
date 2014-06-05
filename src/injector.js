@@ -228,12 +228,16 @@ class Injector {
     // -> error, but let it go inside to throw where exactly is the async provider
     var delayingInstantiation = wantPromise && provider.params.some((param) => !param.isPromise);
     var args = provider.params.map((param) => {
-
-      if (delayingInstantiation) {
-        return this.get(param.token, resolving, true, param.isLazy);
+      var paramInjector = this;
+      if (param.isParent) {
+        paramInjector = this._parent;
       }
 
-      return this.get(param.token, resolving, param.isPromise, param.isLazy);
+      if (delayingInstantiation) {
+        return paramInjector.get(param.token, resolving, true, param.isLazy);
+      }
+
+      return paramInjector.get(param.token, resolving, param.isPromise, param.isLazy);
     });
 
     // Delaying the instantiation - return a promise.

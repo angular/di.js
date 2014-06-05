@@ -41,6 +41,15 @@ class InjectLazy extends Inject {
   }
 }
 
+class InjectParent extends Inject {
+  constructor(...tokens) {
+    this.tokens = tokens;
+    this.isPromise = false;
+    this.isLazy = false;
+    this.isParent = true;
+  }
+}
+
 class Provide {
   constructor(token) {
     this.token = token;
@@ -103,7 +112,7 @@ function readAnnotations(fn) {
     for (var annotation of fn.annotations) {
       if (annotation instanceof Inject) {
         collectedAnnotations.params = annotation.tokens.map((token) => {
-          return {token: token, isPromise: annotation.isPromise, isLazy: annotation.isLazy};
+          return {token: token, isPromise: annotation.isPromise, isLazy: annotation.isLazy, isParent: annotation.isParent};
         });
       }
 
@@ -129,7 +138,8 @@ function readAnnotations(fn) {
           collectedAnnotations.params[idx] = {
             token: paramAnnotation.tokens[0],
             isPromise: paramAnnotation.isPromise,
-            isLazy: paramAnnotation.isLazy
+            isLazy: paramAnnotation.isLazy,
+            isParent: paramAnnotation.isParent
           };
         }
       }
@@ -150,6 +160,7 @@ export {
   Inject,
   InjectPromise,
   InjectLazy,
+  InjectParent,
   Provide,
   ProvidePromise
 };

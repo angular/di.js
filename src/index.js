@@ -6,6 +6,7 @@ export {
   Inject,
   InjectLazy,
   InjectPromise,
+  InjectParent,
   Provide,
   ProvidePromise,
   SuperConstructor,
