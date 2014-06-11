@@ -75,7 +75,7 @@ function inject(...params) {
               return providerWrapper.provider;
             }, {provide: {token: null, isPromise: false}, params: []}));
           } else {
-            // a fn/class provider with overriden token
+            // a fn/class provider with overridden token
             annotations = readAnnotations(providerWrapper.provider);
             providers.set(providerWrapper.as, createProviderFromFnOrClass(providerWrapper.provider, annotations));
           }

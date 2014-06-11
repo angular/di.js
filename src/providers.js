@@ -40,7 +40,7 @@ class ClassProvider {
   }
 
   // Normalize params for all the constructors (in the case of inheritance),
-  // into a single flat array of DependencyDesriptors.
+  // into a single flat array of DependencyDescriptors.
   // So that the injector does not have to worry about inheritance.
   //
   // This function mutates `this.params` and `this._constructors`,

@@ -119,7 +119,7 @@ describe('async', function() {
   });
 
 
-  it('should allow aync dependency in a parent constructor', function(done) {
+  it('should allow async dependency in a parent constructor', function(done) {
     class ChildUserController extends UserController {}
 
     var injector = new Injector([fetchUsers]);
