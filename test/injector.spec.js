@@ -205,84 +205,90 @@ describe('injector', function() {
   });
 
 
-  it('should support "super" to call a parent constructor', function() {
-    class Something {}
+  describe('SuperConstructor', function () {
 
-    @Inject(Something)
-    class Parent {
-      constructor(something) {
-        this.parentSomething = something;
+    
+    it('should support "super" to call a parent constructor', function() {
+      class Something {}
+
+      @Inject(Something)
+      class Parent {
+        constructor(something) {
+          this.parentSomething = something;
+        }
       }
-    }
 
-    @Inject(SuperConstructor, Something)
-    class Child extends Parent {
-      constructor(superConstructor, something) {
-        superConstructor();
-        this.childSomething = something;
+      @Inject(SuperConstructor, Something)
+      class Child extends Parent {
+        constructor(superConstructor, something) {
+          superConstructor();
+          this.childSomething = something;
+        }
       }
-    }
 
-    var injector = new Injector();
-    var instance = injector.get(Child);
+      var injector = new Injector();
+      var instance = injector.get(Child);
 
-    expect(instance.parentSomething).toBeInstanceOf(Something);
-    expect(instance.childSomething).toBeInstanceOf(Something);
-    expect(instance.childSomething).toBe(instance.parentSomething);
-  });
+      expect(instance.parentSomething).toBeInstanceOf(Something);
+      expect(instance.childSomething).toBeInstanceOf(Something);
+      expect(instance.childSomething).toBe(instance.parentSomething);
+    });
 
 
-  it('should support "super" to call multiple parent constructors', function() {
-    class Foo {}
-    class Bar {}
+    it('should support "super" to call multiple parent constructors', function() {
+      class Foo {}
+      class Bar {}
 
-    @Inject(Foo)
-    class Parent {
-      constructor(foo) {
-        this.parentFoo = foo;
+      @Inject(Foo)
+      class Parent {
+        constructor(foo) {
+          this.parentFoo = foo;
+        }
       }
-    }
 
-    @Inject(SuperConstructor, Foo)
-    class Child extends Parent {
-      constructor(superConstructor, foo) {
-        superConstructor();
-        this.childFoo = foo;
+      @Inject(SuperConstructor, Foo)
+      class Child extends Parent {
+        constructor(superConstructor, foo) {
+          superConstructor();
+          this.childFoo = foo;
+        }
       }
-    }
 
-    @Inject(Bar, SuperConstructor, Foo)
-    class GrandChild extends Child {
-      constructor(bar, superConstructor, foo) {
-        superConstructor();
-        this.grandChildBar = bar;
-        this.grandChildFoo = foo;
+      @Inject(Bar, SuperConstructor, Foo)
+      class GrandChild extends Child {
+        constructor(bar, superConstructor, foo) {
+          superConstructor();
+          this.grandChildBar = bar;
+          this.grandChildFoo = foo;
+        }
       }
-    }
 
-    var injector = new Injector();
-    var instance = injector.get(GrandChild);
+      var injector = new Injector();
+      var instance = injector.get(GrandChild);
 
-    expect(instance.parentFoo).toBeInstanceOf(Foo);
-    expect(instance.childFoo).toBeInstanceOf(Foo);
-    expect(instance.grandChildFoo).toBeInstanceOf(Foo);
-    expect(instance.grandChildBar).toBeInstanceOf(Bar);
-  });
+      expect(instance.parentFoo).toBeInstanceOf(Foo);
+      expect(instance.childFoo).toBeInstanceOf(Foo);
+      expect(instance.grandChildFoo).toBeInstanceOf(Foo);
+      expect(instance.grandChildBar).toBeInstanceOf(Bar);
+    });
 
 
-  it('should throw an error when used in a factory function', function() {
-    class Something {}
+    it('should throw an error when used in a factory function', function() {
+      class Something {}
 
-    @Provide(Something)
-    @Inject(SuperConstructor)
-    function createSomething(parent) {
-      console.log('init', parent)
-    }
+      @Provide(Something)
+      @Inject(SuperConstructor)
+      function createSomething(parent) {
+        console.log('init', parent)
+      }
 
-    expect(function() {
-      var injector = new Injector([createSomething]);
-      injector.get(Something);
-    }).toThrowError(/Only classes with a parent can ask for SuperConstructor!/);
+      expect(function() {
+        var injector = new Injector([createSomething]);
+        injector.get(Something);
+      }).toThrowError(/Only classes with a parent can ask for SuperConstructor!/);
+    });
+
+
   });
 
 
