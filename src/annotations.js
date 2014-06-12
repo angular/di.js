@@ -13,9 +13,13 @@ import {isFunction} from './util';
 // A class constructor can ask for this.
 class SuperConstructor {}
 
+// All scopes must
+// extend this
+class ScopeAnnotation {}
+
 // A built-in scope.
 // Never cache.
-class TransientScope {}
+class TransientScope extends ScopeAnnotation {}
 
 class Inject {
   constructor(...tokens) {
@@ -96,7 +100,10 @@ function readAnnotations(fn) {
     // - token (anything)
     // - isPromise (boolean)
     // - isLazy (boolean)
-    params: []
+    params: [],
+
+    // List of Scopes
+    scopes: []
   };
 
   if (fn.annotations && fn.annotations.length) {
@@ -110,6 +117,10 @@ function readAnnotations(fn) {
       if (annotation instanceof Provide) {
         collectedAnnotations.provide.token = annotation.token;
         collectedAnnotations.provide.isPromise = annotation.isPromise;
+      }
+
+      if (annotation instanceof ScopeAnnotation) {
+        collectedAnnotations.scopes.push(annotation);
       }
     }
   }
@@ -146,6 +157,7 @@ export {
   readAnnotations,
 
   SuperConstructor,
+  ScopeAnnotation,
   TransientScope,
   Inject,
   InjectPromise,

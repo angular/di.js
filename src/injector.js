@@ -3,7 +3,8 @@ import {
   readAnnotations,
   hasAnnotation,
   Provide as ProvideAnnotation,
-  TransientScope as TransientScopeAnnotation
+  TransientScope as TransientScopeAnnotation,
+  ScopeAnnotation
 } from './annotations';
 import {isFunction, toString} from './util';
 import {profileInjector} from './profiler';
@@ -39,7 +40,22 @@ function constructResolvingMessage(resolving, token) {
 // - loading different "providers" and modules
 class Injector {
 
-  constructor(modules = [], parentInjector = null, providers = new Map(), scopes = []) {
+  constructor(modules = [], scopes = [], parentInjector = null, providers = new Map()) {
+    for (var Scope of scopes) {
+      if (!(Scope.prototype instanceof ScopeAnnotation)) {
+        throw new Error(`Cannot create injector, '${toString(Scope)}' is not a ScopeAnnotation`);
+      }
+    }
+
+    // Always force new instance of TransientScope.
+    scopes.push(TransientScopeAnnotation);
+
+    if (parentInjector) {
+      for (var scope of scopes) {
+        parentInjector._collectProvidersWithAnnotation(scope, providers);
+      }
+    }
+
     this._cache = new Map();
     this._providers = providers;
     this._parent = parentInjector;
@@ -127,6 +143,16 @@ class Injector {
     return this._parent._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
   }
 
+  // returns true if the current injector can handle a given scope
+  _handlesScopes(scope) {
+    for(var handeldScope of this._scopes) {
+      if (scope instanceof handeldScope) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   // Return an instance for given token.
   get(token, resolving = [], wantPromise = false, wantLazy = false) {
@@ -154,6 +180,7 @@ class Injector {
       return function createLazyInstance() {
         var lazyInjector = injector;
 
+        // TODO remove this
         if (arguments.length) {
           var locals = [];
           var args = arguments;
@@ -198,7 +225,21 @@ class Injector {
 
     // No provider defined (overriden), use the default provider (token).
     if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
-      provider = createProviderFromFnOrClass(token, readAnnotations(token));
+      var annotations = readAnnotations(token);
+      var cantHandle = false;
+      for (var scope of annotations.scopes) {
+        if (!this._handlesScopes(scope)) {
+          cantHandle = scope;
+        }
+      }
+      if (cantHandle) {
+        if (this._parent) {
+          return this._parent.get(token, resolving, wantPromise, wantLazy);
+        } else {
+          throw new Error(`Can't instantiate service '${toString(token)}', ${toString(cantHandle.constructor)} not handled by this injector`);
+        }
+      }
+      provider = createProviderFromFnOrClass(token, annotations);
       return this._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
     }
 
@@ -303,16 +344,7 @@ class Injector {
   // Create a child injector, which encapsulate shorter life scope.
   // It is possible to add additional providers and also force new instances of existing providers.
   createChild(modules = [], forceNewInstancesOf = []) {
-    var forcedProviders = new Map();
-
-    // Always force new instance of TransientScope.
-    forceNewInstancesOf.push(TransientScopeAnnotation);
-
-    for (var annotation of forceNewInstancesOf) {
-      this._collectProvidersWithAnnotation(annotation, forcedProviders);
-    }
-
-    return new Injector(modules, this, forcedProviders, forceNewInstancesOf);
+    return new Injector(modules, forceNewInstancesOf, this);
   }
 }
 

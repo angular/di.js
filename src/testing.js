@@ -82,7 +82,7 @@ function inject(...params) {
         }
       });
 
-      currentSpec.$$injector = new Injector(modules, null, providers);
+      currentSpec.$$injector = new Injector(modules, [], null, providers);
     }
 
     currentSpec.$$injector.get(behavior);
