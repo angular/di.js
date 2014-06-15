@@ -158,4 +158,29 @@ describe('readAnnotations', function() {
     expect(annotations.params[1].isPromise).toBe(false);
     expect(annotations.params[1].isLazy).toBe(false);
   });
+
+  it('should read stacked @Inject{Lazy, Promise} annotations', function() {
+    class One {}
+    class Two {}
+    class Three {}
+
+    @Inject(One)
+    @InjectLazy(Two)
+    @InjectPromise(Three)
+    class Foo {}
+
+    var annotations = readAnnotations(Foo);
+
+    expect(annotations.params[0].token).toBe(One);
+    expect(annotations.params[0].isPromise).toBe(false);
+    expect(annotations.params[0].isLazy).toBe(false);
+
+    expect(annotations.params[1].token).toBe(Two);
+    expect(annotations.params[1].isPromise).toBe(false);
+    expect(annotations.params[1].isLazy).toBe(true);
+
+    expect(annotations.params[2].token).toBe(Three);
+    expect(annotations.params[2].isPromise).toBe(true);
+    expect(annotations.params[2].isLazy).toBe(false);
+  });
 });
