@@ -102,8 +102,12 @@ function readAnnotations(fn) {
   if (fn.annotations && fn.annotations.length) {
     for (var annotation of fn.annotations) {
       if (annotation instanceof Inject) {
-        collectedAnnotations.params = annotation.tokens.map((token) => {
-          return {token: token, isPromise: annotation.isPromise, isLazy: annotation.isLazy};
+        annotation.tokens.forEach((token) => {
+          collectedAnnotations.params.push({
+            token: token,
+            isPromise: annotation.isPromise,
+            isLazy: annotation.isLazy
+          });
         });
       }
 
