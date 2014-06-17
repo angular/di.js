@@ -473,7 +473,7 @@ describe('injector', function() {
     });
 
 
-    it('should force new instances by annotation using overriden provider', function() {
+    it('should force new instances by annotation using overridden provider', function() {
       class RouteScope {}
 
       class Engine {
@@ -499,7 +499,7 @@ describe('injector', function() {
     });
 
 
-    it('should force new instance by annotation using the lowest overriden provider', function() {
+    it('should force new instance by annotation using the lowest overridden provider', function() {
       class RouteScope {}
 
       @RouteScope

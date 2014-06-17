@@ -52,7 +52,7 @@ class Injector {
 
 
   // Collect all registered providers that has given annotation.
-  // Inclugind providers defined in parent injectors.
+  // Including providers defined in parent injectors.
   _collectProvidersWithAnnotation(annotationClass, collectedProviders) {
     this._providers.forEach((provider, token) => {
       if (!collectedProviders.has(token) && hasAnnotation(provider.provider, annotationClass)) {
@@ -94,7 +94,7 @@ class Injector {
 
 
   // Returns true if there is any provider registered for given token.
-  // Inclugind parent injectors.
+  // Including parent injectors.
   _hasProviderFor(token) {
     if (this._providers.has(token)) {
       return true;
@@ -196,7 +196,7 @@ class Injector {
 
     provider = this._providers.get(token);
 
-    // No provider defined (overriden), use the default provider (token).
+    // No provider defined (overridden), use the default provider (token).
     if (!provider && isFunction(token) && !this._hasProviderFor(token)) {
       provider = createProviderFromFnOrClass(token, readAnnotations(token));
       return this._instantiateDefaultProvider(provider, token, resolving, wantPromise, wantLazy);
