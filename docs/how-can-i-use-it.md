@@ -9,7 +9,7 @@ You will need:
 
 ## In Node.js
 ```bash
-npm install di@v2.0.0-pre-12
+npm install di --tag v2
 ```
 
 See the [node example] on how to use the DI in regular ES5.
