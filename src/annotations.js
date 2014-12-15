@@ -61,6 +61,10 @@ class ProvidePromise extends Provide {
 // Append annotation on a function or class.
 // This can be helpful when not using ES6+.
 function annotate(fn, annotation) {
+  if (fn.annotations === Object.getPrototypeOf(fn).annotations) {
+    fn.annotations = []
+  }
+
   fn.annotations = fn.annotations || [];
   fn.annotations.push(annotation);
 }
