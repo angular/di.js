@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject, Provide, SuperConstructor, InjectLazy, TransientScope} from '../src/annotations';
+import {annotate, Inject, Provide, SuperConstructor, InjectLazy, TransientScope} from '../src/annotations';
 
 import {Car, CyclicEngine} from './fixtures/car';
 import {module as houseModule} from './fixtures/house';
@@ -262,6 +262,45 @@ describe('injector', function() {
           this.grandChildFoo = foo;
         }
       }
+
+      var injector = new Injector();
+      var instance = injector.get(GrandChild);
+
+      expect(instance.parentFoo).toBeInstanceOf(Foo);
+      expect(instance.childFoo).toBeInstanceOf(Foo);
+      expect(instance.grandChildFoo).toBeInstanceOf(Foo);
+      expect(instance.grandChildBar).toBeInstanceOf(Bar);
+    });
+
+
+    it('should support "super" to call multiple parent constructors with annotate helper', function() {
+      class Foo {}
+      class Bar {}
+
+      class Parent {
+        constructor(foo) {
+          this.parentFoo = foo;
+        }
+      }
+      annotate(Parent, new Inject(Foo))
+
+      class Child extends Parent {
+        constructor(superConstructor, foo) {
+          superConstructor();
+          this.childFoo = foo;
+        }
+      }
+      annotate(Child, new Inject(SuperConstructor, Foo))
+
+      class GrandChild extends Child {
+        constructor(bar, superConstructor, foo) {
+          superConstructor();
+          this.grandChildBar = bar;
+          this.grandChildFoo = foo;
+        }
+      }
+      annotate(GrandChild, new Inject(Bar, SuperConstructor, Foo))
+
 
       var injector = new Injector();
       var instance = injector.get(GrandChild);
