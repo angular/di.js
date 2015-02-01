@@ -1,6 +1,26 @@
-import {SuperConstructor as SuperConstructorAnnotation, readAnnotations} from './annotations';
-import {isClass, isFunction, isObject, toString} from './util';
+import {
+  ClassProvider as ClassProviderAnnotation,
+  FactoryProvider as FactoryProviderAnnotation,
+  SuperConstructor as SuperConstructorAnnotation,
+  readAnnotations,
+  hasAnnotation
+} from './annotations';
+import {isFunction, isObject, toString, isUpperCase} from './util';
 
+function isClass(clsOrFunction) {
+
+  if (hasAnnotation(clsOrFunction, ClassProviderAnnotation)) {
+    return true
+  } 
+  else if(hasAnnotation(clsOrFunction, FactoryProviderAnnotation)) {
+    return false
+  }
+  else if (clsOrFunction.name) {
+    return isUpperCase(clsOrFunction.name.charAt(0));
+  } else {
+    return Object.keys(clsOrFunction.prototype).length > 0;
+  }
+}
 
 // Provider is responsible for creating instances.
 //

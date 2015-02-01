@@ -1,5 +1,5 @@
 import {Injector} from '../src/injector';
-import {Inject, Provide, SuperConstructor, InjectLazy, TransientScope} from '../src/annotations';
+import {Inject, Provide, SuperConstructor, InjectLazy, TransientScope, ClassProvider, FactoryProvider} from '../src/annotations';
 
 import {Car, CyclicEngine} from './fixtures/car';
 import {module as houseModule} from './fixtures/house';
@@ -341,6 +341,24 @@ describe('injector', function() {
     var injector = new Injector();
 
     expect(injector.get(Injector)).toBe(injector);
+  });
+
+  describe('provider', function() {
+    it('should read class annotation as a class', function(){
+      @ClassProvider
+      class lowercase{}
+
+      var injector = new Injector();
+      expect(injector.get(lowercase)).toBeInstanceOf(lowercase);
+    });
+
+    it('should read factory annotation as a factory', function(){
+      @FactoryProvider
+      function Uppercase() {}
+
+      var injector = new Injector();
+      expect(injector.get(Uppercase)).not.toBeInstanceOf(Uppercase);
+    });
   });
 
 

@@ -1,6 +1,5 @@
 import {isFunction} from './util';
 
-
 // This module contains:
 // - built-in annotation classes
 // - helpers to read/write annotations
@@ -54,6 +53,9 @@ class ProvidePromise extends Provide {
     this.isPromise = true;
   }
 }
+
+class ClassProvider {}
+class FactoryProvider {}
 
 
 // HELPERS
@@ -155,5 +157,7 @@ export {
   InjectPromise,
   InjectLazy,
   Provide,
-  ProvidePromise
+  ProvidePromise,
+  ClassProvider,
+  FactoryProvider
 };
