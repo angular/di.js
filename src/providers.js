@@ -5,7 +5,7 @@ import {
   readAnnotations,
   hasAnnotation
 } from './annotations';
-import {isFunction, isObject, toString, isUpperCase} from './util';
+import {isFunction, isObject, toString, isUpperCase, ownKeys} from './util';
 
 function isClass(clsOrFunction) {
 
@@ -18,8 +18,7 @@ function isClass(clsOrFunction) {
   else if (clsOrFunction.name) {
     return isUpperCase(clsOrFunction.name.charAt(0));
   } else {
-    var hasSymbol = Object.getOwnPropertySymbols && Object.getOwnPropertySymbols(clsOrFunction.prototype).length > 0;
-    return Object.getOwnPropertyNames(clsOrFunction.prototype).length > 0 || hasSymbol;
+    return ownKeys(clsOrFunction.prototype).length > 0;
   }
 }
 
