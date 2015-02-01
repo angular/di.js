@@ -9,5 +9,7 @@ export {
   Provide,
   ProvidePromise,
   SuperConstructor,
-  TransientScope
+  TransientScope,
+  ClassProvider,
+  FactoryProvider
 } from './annotations';
