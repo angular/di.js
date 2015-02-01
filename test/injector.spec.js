@@ -352,6 +352,15 @@ describe('injector', function() {
       expect(injector.get(lowercase)).toBeInstanceOf(lowercase);
     });
 
+    it('should read as class even if properties are non-enumerable', function() {
+      // Class without a name will fall through to keys check
+      var SomeClass = function (){}
+      Object.defineProperty(SomeClass.prototype, 'method', { enumerable: false, value: function() {} });
+
+      var injector = new Injector();
+      expect(injector.get(SomeClass)).toBeInstanceOf(SomeClass);
+    });
+
     it('should read factory annotation as a factory', function(){
       @FactoryProvider
       function Uppercase() {}
