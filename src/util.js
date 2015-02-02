@@ -39,7 +39,6 @@ var ownKeys = (this.Reflect && Reflect.ownKeys ? Reflect.ownKeys : function ownK
 
 export {
   isUpperCase,
-  isClass,
   isFunction,
   isObject,
   toString,
