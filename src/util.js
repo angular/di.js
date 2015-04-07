@@ -14,7 +14,7 @@ function isObject(value) {
 }
 
 
-function toString(token) {
+function tokenToString(token) {
   if (typeof token === 'string') {
     return token;
   }
