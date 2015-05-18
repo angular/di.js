@@ -218,11 +218,8 @@ class Injector {
 
     resolving.push(token);
 
-    // TODO(vojta): handle these cases:
+    // TODO(vojta): handle this case:
     // 1/
-    // - requested as promise (delayed)
-    // - requested again as promise (before the previous gets resolved) -> cache the promise
-    // 2/
     // - requested as promise (delayed)
     // - requested again sync (before the previous gets resolved)
     // -> error, but let it go inside to throw where exactly is the async provider
@@ -243,7 +240,9 @@ class Injector {
       resolving.pop();
 
       // Once all dependencies (promises) are resolved, instantiate.
-      return Promise.all(args).then(function(args) {
+      instance = Promise.all(args).then(function(args) {
+        injector._cache.delete(token);
+
         try {
           instance = provider.create(args);
         } catch (e) {
@@ -264,6 +263,8 @@ class Injector {
         // a promise or not.
         return instance;
       });
+      this._cache.set(token, instance);
+      return instance;
     }
 
     try {

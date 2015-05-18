@@ -97,6 +97,17 @@ describe('async', function() {
     expect(controller.promise).toBePromiseLike();
   });
 
+  it('should not instantiate multiple times in case of delayed instantiating', function(done) {
+    var injector = new Injector([fetchUsers]);
+
+    Promise.all([
+      injector.getPromise(UserController),
+      injector.getPromise(UserController)
+    ]).then(function(result) {
+      expect(result[0]).toBe(result[1]);
+      done();
+    });
+  });
 
   // regression
   it('should not cache TransientScope', function(done) {
