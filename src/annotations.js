@@ -148,6 +148,42 @@ function readAnnotations(fn) {
   return collectedAnnotations;
 }
 
+// Decorator versions of annotation classes
+function inject(...tokens) {
+  return function(fn) {
+    annotate(fn, new Inject(...tokens));
+  };
+}
+
+function inject(...tokens) {
+  return function(fn) {
+    annotate(fn, new Inject(...tokens));
+  };
+}
+
+function injectPromise(...tokens) {
+  return function(fn) {
+    annotate(fn, new InjectPromise(...tokens));
+  };
+}
+
+function injectLazy(...tokens) {
+  return function(fn) {
+    annotate(fn, new InjectLazy(...tokens));
+  };
+}
+
+function provide(...tokens) {
+  return function(fn) {
+    annotate(fn, new Provide(...tokens));
+  };
+}
+
+function providePromise(...tokens) {
+  return function(fn) {
+    annotate(fn, new ProvidePromise(...tokens));
+  };
+}
 
 export {
   annotate,
@@ -162,5 +198,11 @@ export {
   Provide,
   ProvidePromise,
   ClassProvider,
-  FactoryProvider
+  FactoryProvider,
+
+  inject,
+  injectPromise,
+  injectLazy,
+  provide,
+  providePromise,
 };

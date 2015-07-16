@@ -11,5 +11,10 @@ export {
   SuperConstructor,
   TransientScope,
   ClassProvider,
-  FactoryProvider
+  FactoryProvider,
+  inject,
+  injectPromise,
+  injectLazy,
+  provide,
+  providePromise
 } from './annotations';
